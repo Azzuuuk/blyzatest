@@ -1,26 +1,18 @@
-import React from 'react';
-import { ref, update } from 'firebase/database';
+// In components/LobbyScreen.js
 
-export default function LobbyScreen({ user, gameId, gameState, leaveGame, db, playSound, sfxRefs, itemsData }) {
+import React from 'react';
+
+// Notice we no longer need to import `ref` or `update` from firebase
+// We also removed `db`, `itemsData` from the props
+
+export default function LobbyScreen({ user, gameId, gameState, leaveGame, startGame, playSound, sfxRefs }) {
     const isHost = gameState.hostId === user.uid;
     const players = Object.entries(gameState.players);
 
-    const startGame = () => {
-        if (!isHost) return;
-        playSound(sfxRefs.start);
-        const firstItemIndex = Math.floor(Math.random() * itemsData.length);
-        const updates = {
-            status: 'in-game',
-            currentRound: 1,
-            currentItemIndex: firstItemIndex,
-            usedItemIndexes: [firstItemIndex],
-            ...players.reduce((acc, [uid]) => {
-                acc[`/players/${uid}/score`] = 0;
-                return acc;
-            }, {})
-        };
-        update(ref(db, `games/${gameId}`), updates);
-    };
+    const handleStartClick = () => {
+        // The component's only job is to call the function passed from the parent
+        startGame(); 
+    }
 
     return (
         <div className="screen active">
@@ -38,7 +30,7 @@ export default function LobbyScreen({ user, gameId, gameState, leaveGame, db, pl
                 ))}
             </div>
             <div className="game-over-buttons-container">
-                {isHost && <button id="start-game-btn" onClick={startGame} disabled={players.length < 2}><i className="fas fa-play"></i> Start Game</button>}
+                {isHost && <button id="start-game-btn" onClick={handleStartClick} disabled={players.length < 2}><i className="fas fa-play"></i> Start Game</button>}
                 {!isHost && <p>Waiting for the host to start the game...</p>}
                 <button id="new-game-btn" className="btn-secondary" onClick={leaveGame}><i className="fas fa-door-open"></i> Leave Lobby</button>
             </div>

@@ -511,6 +511,40 @@ const joinGame = (idToJoin, playerName) => {
         setGameState(null);
     };
 
+    // In pages/guess-the-price.js
+
+// ... after your leaveGame function ...
+
+const startGame = () => {
+    // Ensure only the host can start the game
+    if (!gameState || gameState.hostId !== user.uid) {
+        console.error("Non-host or no game state, cannot start game.");
+        return;
+    }
+
+    console.log("Host is starting the game...");
+    playSound(sfxRefs.start);
+
+    const firstItemIndex = Math.floor(Math.random() * itemsData.length);
+    const players = Object.keys(gameState.players);
+
+    const updates = {
+        status: 'in-game',
+        currentRound: 1,
+        currentItemIndex: firstItemIndex,
+        usedItemIndexes: [firstItemIndex],
+        // Also reset all player scores to 0 when the game starts
+        ...players.reduce((acc, uid) => {
+            acc[`/players/${uid}/score`] = 0;
+            return acc;
+        }, {})
+    };
+
+    update(ref(db, `games/${gameId}`), updates);
+};
+
+// ... rest of your file ...
+
     const goBackToModeSelect = () => {
         if (gameId) leaveGame();
         handleNewGame();
@@ -554,7 +588,7 @@ const joinGame = (idToJoin, playerName) => {
                     : !gameId ? <MultiplayerStartScreen {...{user, createGame, joinGame}} />
                     : !gameState ? <div className="loading-screen">Joining Game...</div>
                     : {
-                        'lobby': <LobbyScreen {...onlineGameProps} />,
+                        'lobby': <LobbyScreen {...onlineGameProps} startGame={startGame} />,
                         'in-game': <OnlineGameScreen {...onlineGameProps} />,
                         'results': <OnlineResultsScreen {...onlineGameProps} />,
                         'game-over': (() => {
