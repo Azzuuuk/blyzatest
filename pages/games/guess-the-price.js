@@ -397,12 +397,23 @@ export default function GuessThePricePage() {
         setTeams([{ name: 'Team 1' }, { name: 'Team 2' }]);
     };
     
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            if (currentUser) setUser(currentUser);
-        });
-        return () => unsubscribe();
-    }, []);
+   // ACTION: Replace the old block with this one
+
+useEffect(() => {
+    // --- ADD THIS LOG ---
+    console.log("Firebase Auth listener is now active. Waiting for auth state change...");
+
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        // --- ADD THESE LOGS ---
+        if (currentUser) {
+            console.log("SUCCESS: Firebase has signed in a user:", currentUser.uid);
+            setUser(currentUser);
+        } else {
+            console.log("Auth State Changed: No user is currently signed in.");
+        }
+    });
+    return () => unsubscribe();
+}, []);
 
     useEffect(() => {
         if (playMode !== 'online' || !gameId || !user) {
