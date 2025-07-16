@@ -448,18 +448,57 @@ useEffect(() => {
         setGameId(newGameId);
     };
 
-    const joinGame = (idToJoin, playerName) => {
-        if (!user) return showToast("Authentication error, please wait a moment.", "wrong");
-        const gameRef = ref(db, `games/${idToJoin}`);
-        onValue(gameRef, async (snapshot) => {
-            if (snapshot.exists() && snapshot.val().status === 'lobby') {
-                await set(ref(db, `games/${idToJoin}/players/${user.uid}`), { name: playerName, score: 0 });
-                setGameId(idToJoin);
+   // In pages/guess-the-price.js
+
+const joinGame = (idToJoin, playerName) => {
+    console.log("--- joinGame function started ---");
+    console.log(`Attempting to join game: [${idToJoin}] as player: [${playerName}]`);
+    console.log("Current user object is:", user);
+
+    if (!user) {
+        showToast("Authentication error, please wait a moment.", "wrong");
+        console.error("JOIN GAME BLOCKED: User object is null.");
+        return;
+    }
+
+    const gameRef = ref(db, `games/${idToJoin}`);
+    console.log("Created database reference to:", gameRef.toString());
+
+    // Using onValue to check the game's status
+    onValue(gameRef, async (snapshot) => {
+        console.log("Firebase onValue listener fired.");
+        
+        if (snapshot.exists()) {
+            console.log("SUCCESS: Game ID found in database.");
+            const gameData = snapshot.val();
+            console.log("Game data:", gameData);
+
+            if (gameData.status === 'lobby') {
+                console.log("SUCCESS: Game is in lobby. Attempting to add player.");
+                try {
+                    const playerRef = ref(db, `games/${idToJoin}/players/${user.uid}`);
+                    await set(playerRef, { name: playerName, score: 0 });
+                    console.log("Successfully added player to database.");
+                    
+                    // This is what changes the screen
+                    setGameId(idToJoin);
+                    console.log("Local gameId state set. Screen should change to lobby.");
+
+                } catch (error) {
+                    console.error("FIREBASE WRITE FAILED when joining:", error);
+                    showToast("Error joining game. Permission denied.", "wrong");
+                }
             } else {
-                showToast("Game not found or has already started.", "wrong");
+                console.error("JOIN FAILED: Game exists, but is not in lobby. Status is:", gameData.status);
+                showToast("This game has already started.", "wrong");
             }
-        }, { onlyOnce: true });
-    };
+
+        } else {
+            console.error("JOIN FAILED: Snapshot does not exist. No game found with ID:", idToJoin);
+            showToast("Game code not found. Please double-check the code.", "wrong");
+        }
+    }, { onlyOnce: true });
+};
     
     const leaveGame = () => {
         if (!user || !gameId || !gameState) return;
