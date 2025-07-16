@@ -1,17 +1,21 @@
 import { useState } from 'react';
 
-export default function MultiplayerStartScreen({ createGame, joinGame }) {
+export default function MultiplayerStartScreen({ user, createGame, joinGame }) {
     const [playerName, setPlayerName] = useState('');
     const [joinCode, setJoinCode] = useState('');
 
+    // This checks if the user is authenticated AND has typed a name
+    const isReadyToCreate = user && playerName.trim() !== '';
+    // This also checks if they've typed a 5-character join code
+    const isReadyToJoin = user && playerName.trim() !== '' && joinCode.trim().length === 5;
+
     const handleCreate = () => {
-        if (!playerName.trim()) return alert("Please enter your name!");
+        if (!isReadyToCreate) return; // This check is for safety
         createGame(playerName.trim());
     };
 
     const handleJoin = () => {
-        if (!playerName.trim()) return alert("Please enter your name!");
-        if (!joinCode.trim()) return alert("Please enter a game code!");
+        if (!isReadyToJoin) return; // This check is for safety
         joinGame(joinCode.trim().toUpperCase(), playerName.trim());
     };
 
@@ -26,12 +30,25 @@ export default function MultiplayerStartScreen({ createGame, joinGame }) {
                 <div className="team-input-wrapper" style={{maxWidth: '400px', margin: '0 auto 15px auto'}}>
                     <input type="text" className="team-name-input" placeholder="Enter Your Name" value={playerName} onChange={(e) => setPlayerName(e.target.value)} maxLength="15" />
                 </div>
-                <button onClick={handleCreate} className="btn-primary"><i className="fas fa-plus-circle"></i> Create Game</button>
+                
+                {/* The "disabled" attribute makes the button unclickable until isReadyToCreate is true */}
+                <button onClick={handleCreate} className="btn-primary" disabled={!isReadyToCreate}>
+                    <i className="fas fa-plus-circle"></i> Create Game
+                </button>
+                
+                {/* This message shows the user why the button might be disabled */}
+                {!user && <p style={{marginTop: '10px', color: 'var(--text-medium)'}}>Connecting to server...</p>}
+
                 <hr style={{margin: '20px 0', border: '1px solid #ddd'}} />
+                
                 <div className="team-input-wrapper" style={{maxWidth: '400px', margin: '0 auto 15px auto'}}>
                     <input type="text" className="team-name-input" placeholder="Enter Game Code" value={joinCode} onChange={(e) => setJoinCode(e.target.value)} maxLength="5" style={{textTransform: 'uppercase'}} />
                 </div>
-                <button onClick={handleJoin} className="btn-secondary"><i className="fas fa-sign-in-alt"></i> Join Game</button>
+
+                {/* This button is also disabled until all conditions are met */}
+                <button onClick={handleJoin} className="btn-secondary" disabled={!isReadyToJoin}>
+                    <i className="fas fa-sign-in-alt"></i> Join Game
+                </button>
             </div>
         </div>
     );

@@ -3,15 +3,15 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Script from 'next/script';
 // --- NEW: Firebase Imports ---
-import { auth, db } from '/firebase'; // Make sure this path is correct
+import { auth, db } from '../firebase'; // Make sure this path is correct
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { ref, set, onValue, update, remove, onDisconnect } from 'firebase/database';
 
 // --- NEW: Import the components you will create in Part 2 ---
-import MultiplayerStartScreen from '/components/MultiplayerStartScreen';
-import LobbyScreen from '/components/LobbyScreen';
-import OnlineGameScreen from '/components/OnlineGameScreen';
-import OnlineResultsScreen from '/components/OnlineResultsScreen';
+import MultiplayerStartScreen from '../components/MultiplayerStartScreen';
+import LobbyScreen from '../components/LobbyScreen';
+import OnlineGameScreen from '../components/OnlineGameScreen';
+import OnlineResultsScreen from '../components/OnlineResultsScreen';
 
 // --- Static Game Data (Your existing data, unchanged) ---
 const itemsData = [
@@ -26,7 +26,6 @@ const GameScreen = { START: 'start', GAME: 'game', RESULTS: 'results', GAME_OVER
 //  YOUR EXISTING UI COMPONENTS (Unchanged)
 // ==================================================================
 const StartScreenComponent = ({ gameMode, setGameMode, playSound, sfxRefs, teams, setTeams, handleStartGame, setSinglePlayerSubType, highScore }) => (
-    // Your existing StartScreenComponent JSX...
     <div id="start-screen" className="screen active">
         <img className="brand-logo brand-logo-prominent" src="https://static.wixstatic.com/shapes/9ce3e5_4f0149a89dd841859da02f59247b5b6b.svg" alt="Blyza Mascot" />
         <h1>Guess The Price</h1>
@@ -82,7 +81,6 @@ const StartScreenComponent = ({ gameMode, setGameMode, playSound, sfxRefs, teams
     </div>
 );
 const GameScreenComponent = ({ gameMode, singlePlayerSubType, scores, currentRound, curtainsOpen, currentItem, teams, guesses, setGuesses, handleRevealPrice }) => (
-    // Your existing GameScreenComponent JSX...
      <div id="game-screen" className="screen active">
         <div className="game-info">
             {gameMode === 'single' && singlePlayerSubType === 'infinite' ? (<div>Score: <span>{scores['You'] || 0}</span></div>) : (<div>Round <span>{currentRound}</span></div>)}
@@ -113,7 +111,6 @@ const GameScreenComponent = ({ gameMode, singlePlayerSubType, scores, currentRou
     </div>
 );
 const ResultsScreenComponent = ({ currentItem, guesses, teams, scores, gameMode, singlePlayerSubType, currentRound, setScreen, handleNextRound, roundResults }) => {
-    // Your existing ResultsScreenComponent JSX...
     const isGameOver = useMemo(() => {
         if (!roundResults) return false;
         const potentialScores = roundResults.winner ? { ...scores, [roundResults.winner]: (scores[roundResults.winner] || 0) + 1 } : scores;
@@ -152,9 +149,7 @@ const ResultsScreenComponent = ({ currentItem, guesses, teams, scores, gameMode,
     );
 };
 const GameOverScreenComponent = ({ scores, gameMode, handleNewGame, singlePlayerSubType, highScore, setHighScore }) => {
-    // Your existing GameOverScreenComponent, with a slight modification for router usage
     const router = useRouter();
-    // ... rest of your GameOverScreenComponent logic
     useEffect(() => { 
       if (gameMode === 'single' && singlePlayerSubType === 'infinite') {
           const finalScore = scores['You'] || 0;
@@ -223,7 +218,6 @@ const GameOverScreenComponent = ({ scores, gameMode, handleNewGame, singlePlayer
     );
 };
 const SettingsModal = ({ setOpen, musicVolume, setMusicVolume, sfxEnabled, setSfxEnabled, playSound, sfxRefs }) => (
-    // Your existing SettingsModal JSX...
     <div className="modal" style={{ display: 'flex' }}>
         <div className="modal-content">
             <span className="close-modal-btn" onClick={() => setOpen(false)}>×</span>
@@ -244,15 +238,13 @@ const SettingsModal = ({ setOpen, musicVolume, setMusicVolume, sfxEnabled, setSf
 
 
 // ==================================================================
-//  MAIN PAGE COMPONENT (Completely new logic)
+//  MAIN PAGE COMPONENT 
 // ==================================================================
 export default function GuessThePricePage() {
     const router = useRouter();
 
-    // --- State for Mode Selection ---
-    const [playMode, setPlayMode] = useState(null); // 'local', 'online', or null
+    const [playMode, setPlayMode] = useState(null);
 
-    // --- State for LOCAL game (your original state) ---
     const [screen, setScreen] = useState(GameScreen.START);
     const [teams, setTeams] = useState([{ name: 'Team 1' }, { name: 'Team 2' }]);
     const [gameMode, setGameMode] = useState('single');
@@ -266,12 +258,10 @@ export default function GuessThePricePage() {
     const [roundResults, setRoundResults] = useState(null);
     const [curtainsOpen, setCurtainsOpen] = useState(false);
 
-    // --- State for ONLINE game (new state) ---
     const [user, setUser] = useState(null);
     const [gameId, setGameId] = useState(null);
     const [gameState, setGameState] = useState(null);
 
-    // --- Shared State (Audio, Modals, etc.) ---
     const [isAudioConsentModalOpen, setAudioConsentModalOpen] = useState(true);
     const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
     const [sfxEnabled, setSfxEnabled] = useState(true);
@@ -282,7 +272,6 @@ export default function GuessThePricePage() {
     const backgroundMusicRef = useRef(null);
     const sfxRefs = { start: useRef(null), interaction: useRef(null), correct: useRef(null), wrong: useRef(null), curtain: useRef(null) };
     
-    // --- All your existing useEffects for local game ---
     useEffect(() => {
         const setAppHeight = () => document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
         window.addEventListener('resize', setAppHeight); setAppHeight();
@@ -325,14 +314,13 @@ export default function GuessThePricePage() {
         return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }, [audioContextStarted, musicVolume]);
 
-
-    // --- All your existing local game functions ---
     const showToast = (message, type = 'info') => {
         setToast({ show: true, message, type });
         setTimeout(() => setToast({ show: false, message: '', type: '' }), 2500);
     };
     const initAudio = () => { if (audioContextStarted) return; setAudioContextStarted(true); };
     const playSound = (soundRef) => { if (sfxEnabled && soundRef.current && audioContextStarted) { soundRef.current.currentTime = 0; soundRef.current.play().catch(e => {}); }};
+    
     const setupRound = (currentUsedItems = usedItems) => {
         setGuesses({});
         setRoundResults(null);
@@ -409,8 +397,6 @@ export default function GuessThePricePage() {
         setTeams([{ name: 'Team 1' }, { name: 'Team 2' }]);
     };
     
-
-    // --- NEW: Firebase Logic ---
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             if (currentUser) setUser(currentUser);
@@ -440,7 +426,7 @@ export default function GuessThePricePage() {
     }, [playMode, gameId, user]);
     
     const createGame = async (playerName) => {
-        if (!user) return showToast("Authentication error, please wait.", "wrong");
+        if (!user) return showToast("Authentication error, please wait a moment.", "wrong");
         const newGameId = Math.random().toString(36).substring(2, 7).toUpperCase();
         const gameRef = ref(db, `games/${newGameId}`);
         const initialGameState = {
@@ -452,7 +438,7 @@ export default function GuessThePricePage() {
     };
 
     const joinGame = (idToJoin, playerName) => {
-        if (!user) return showToast("Authentication error, please wait.", "wrong");
+        if (!user) return showToast("Authentication error, please wait a moment.", "wrong");
         const gameRef = ref(db, `games/${idToJoin}`);
         onValue(gameRef, async (snapshot) => {
             if (snapshot.exists() && snapshot.val().status === 'lobby') {
@@ -477,11 +463,10 @@ export default function GuessThePricePage() {
 
     const goBackToModeSelect = () => {
         if (gameId) leaveGame();
-        handleNewGame(); // Reset local game state
+        handleNewGame();
         setPlayMode(null);
     }
     
-    // --- TOP LEVEL RENDER LOGIC ---
     const localGameProps = { gameMode, setGameMode, playSound, sfxRefs, teams, setTeams, handleStartGame, setSinglePlayerSubType, highScore, scores, currentRound, curtainsOpen, currentItem, guesses, setGuesses, handleRevealPrice, roundResults, setScreen, handleNextRound, handleNewGame, setHighScore };
 
     if (playMode === 'local') {
@@ -508,7 +493,7 @@ export default function GuessThePricePage() {
     } 
     
     if (playMode === 'online') {
-        const onlineGameProps = { user, gameId, gameState, leaveGame, itemsData, db, playSound, sfxRefs, showToast };
+        const onlineGameProps = { user, gameId, gameState, itemsData, db, playSound, sfxRefs, showToast };
         return (
             <>
                 <Head><title>Guess The Price - Online</title><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" /></Head>
@@ -536,7 +521,6 @@ export default function GuessThePricePage() {
         );
     }
     
-    // Default render: Mode Selection Screen
     return (
         <>
             <Head><title>Guess The Price - Select Mode</title><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" /></Head>
