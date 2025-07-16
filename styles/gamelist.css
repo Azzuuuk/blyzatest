@@ -1,0 +1,294 @@
+:root {
+        --blyza-orange-primary: #FF8833;
+        --blyza-purple-secondary: #cb7ae1;
+        --blyza-keppel-accent: #00BFA6; /* For Social & Deception */
+        --blyza-neon-pink: #FF00FF;
+        --blyza-sunny-yellow: #FFDF00;
+
+        /* --- NEW CATEGORY COLORS --- */
+        --blyza-brainy-blue: #4834D4;   /* For Brain Busters */
+        --blyza-quickfire-red: #EA2027;  /* For Quickfire */
+        
+        --darker-grey-bg: #4A4A4A;
+        --text-light: #FDFEFE;
+        --text-dark: #2C3A47;
+        --text-medium: #535c68;
+        --bg-dark-start: #1A1C20;
+        --bg-dark-end: #2C3A47;
+        --black-stroke: #1A1A1A;
+        --font-logo: "Luckiest Guy", cursive;
+        --font-heading-alt: "Bungee", cursive;
+        --font-body: 'Quicksand', sans-serif;
+        --border-radius-game: 12px;
+        --shadow-chunky: 4px 4px 0px var(--black-stroke);
+    }
+
+    /* --- Basic Reset & Body --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+        font-family: var(--font-body);
+        color: var(--text-light);
+        background: linear-gradient(135deg, var(--blyza-orange-primary) 0%, var(--blyza-purple-secondary) 100%);
+        line-height: 1.6;
+        overflow-x: hidden;
+        position: relative;
+    }
+    .container { max-width: 1140px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 2; }
+
+    /* --- Floating Background Elements (from Landing Page) --- */
+    .hero-background-elements { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events: none; }
+    .bg-game-element {
+        position: absolute;
+        opacity: 0.08; color: var(--text-light);
+        animation: floatSimple 20s infinite ease-in-out alternate;
+        user-select: none;
+    }
+    .game-controller-1 { font-size: 150px; top: 10%; left: 5%; --initial-rotate: -15deg; animation-duration: 22s; }
+    .game-joystick-1 { width: 100px; height: 120px; top: 65%; right: 8%; --initial-rotate: 10deg; animation-duration: 18s; display: flex; flex-direction: column; align-items: center; }
+    .game-over-text-1 { font-family: var(--font-heading-alt); font-size: 120px; line-height: 0.9; text-align: center; top: 70%; left: 15%; --initial-rotate: 5deg; animation-duration: 25s; opacity: 0.06; }
+    .game-arcade-1 { font-size: 130px; top: 15%; right: 10%; --initial-rotate: 20deg; animation-duration: 16s; transform: scaleX(-1); }
+    .joystick-base { width: 100%; height: 30%; background-color: currentColor; border-radius: 10px 10px 0 0; opacity: 0.7; }
+    .joystick-stick { width: 20%; height: 50%; background-color: currentColor; opacity: 0.9; }
+    .joystick-top { width: 35%; height: 20%; background-color: var(--blyza-neon-pink); border-radius: 50%; opacity: 1; align-self: center; position: relative; bottom: 5%; }
+
+    @keyframes floatSimple {
+        0% { transform: translateY(0px) rotate(var(--initial-rotate, 0deg)); }
+        50% { transform: translateY(-25px) rotate(calc(var(--initial-rotate, 0deg) + 8deg)); }
+        100% { transform: translateY(0px) rotate(calc(var(--initial-rotate, 0deg) - 8deg)); }
+    }
+
+    /* --- Page Header (Title section) --- */
+    .page-header {
+        text-align: center;
+        padding: 60px 20px 40px;
+        position: relative;
+    }
+    .brand-logo-prominent {
+    display: block;
+    margin: 0 auto 15px;
+    max-height: 135px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+    transition: transform 0.3s ease-out, filter 0.3s ease-out;
+}
+.brand-logo-prominent:hover {
+    transform: scale(1.08); 
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.4));
+}
+    .page-header h1 {
+        font-family: var(--font-logo); font-size: clamp(2.8rem, 6vw, 4rem);
+        color: var(--text-light); line-height: 1.1;
+        -webkit-text-stroke: 2px var(--black-stroke); text-stroke: 2px var(--black-stroke);
+        text-shadow: 3px 3px 0px rgba(0,0,0,0.25); margin-bottom: 0.25em;
+    }
+    .page-header .subtitle {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--blyza-sunny-yellow);
+    font-weight: 2000; 
+    max-width: 550px;
+    margin: 0 auto;
+    letter-spacing: 0.02em; 
+    text-shadow: 0 0 12px rgba(255, 255, 0, 0.7); 
+    -webkit-text-stroke: #1A1A1A 1.5px;
+}
+
+    /* --- Search & Filters (Funky Style) --- */
+    .search-container { max-width: 700px; margin: 0 auto 30px; display: flex; align-items: center; gap: 15px; }
+    .search-bar { flex-grow: 1; position: relative; }
+    .search-input {
+        width: 100%; padding: 15px 20px; padding-left: 55px; border-radius: 50px;
+        border: 3px solid var(--black-stroke); background: var(--text-light);
+        color: var(--text-dark); font-size: 1rem; transition: all 0.3s ease;
+        font-family: var(--font-body); font-weight: 600;
+    }
+    .search-input::placeholder { color: var(--text-medium); }
+    .search-input:focus { outline: none; border-color: var(--blyza-orange-primary); box-shadow: 0 0 0 3px var(--blyza-sunny-yellow); }
+    .search-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--blyza-orange-primary); font-size: 1.3rem; }
+    #surprise-me-btn {
+        font-family: var(--font-heading-alt);
+        background-color: var(--blyza-neon-pink); color: var(--text-light);
+        border: 3px solid var(--black-stroke); border-radius: 8px;
+        padding: 12px 20px; white-space: nowrap;
+        box-shadow: var(--shadow-chunky); transition: transform 0.1s ease, box-shadow 0.1s ease;
+        cursor: pointer;
+    }
+    #surprise-me-btn:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--black-stroke); }
+    #surprise-me-btn:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px var(--black-stroke); }
+
+
+    .category-filter { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; padding: 0 15px; }
+    .category-btn {
+        font-family: var(--font-heading-alt); background: transparent;
+        border: 3px solid var(--text-light); color: var(--text-light);
+        padding: 8px 18px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+        font-weight: 600; font-size: 0.9rem;
+        box-shadow: 4px 4px 0px rgba(255,255,255,0.3); text-transform: uppercase;
+    }
+    .category-btn:hover {
+        background: var(--text-light); color: var(--text-dark);
+        border-color: var(--blyza-sunny-yellow); box-shadow: 4px 4px 0 var(--blyza-sunny-yellow);
+        transform: translateY(-2px);
+    }
+    .category-btn.active { background: var(--blyza-sunny-yellow); color: var(--text-dark); border-color: var(--black-stroke); box-shadow: var(--shadow-chunky); }
+
+    .category-btn.active[data-category="Brain Busters"] { background: var(--blyza-brainy-blue); color: var(--text-light); }
+    .category-btn.active[data-category="Social & Deception"] { background: var(--blyza-keppel-accent); color: var(--text-light); }
+    .category-btn.active[data-category="Quickfire"] { background: var(--blyza-quickfire-red); color: var(--text-light); }
+    
+    /* --- Game Grid & Cards (The Main Event!) --- */
+    .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5em; padding: 20px; margin-bottom: 80px;}
+
+    .game-card-item {
+        animation-name: floatCard; animation-duration: 6s; animation-timing-function: ease-in-out; animation-iteration-count: infinite;
+        display: flex; flex-direction: column;
+    }
+    .game-card-content {
+        background: linear-gradient(145deg, #fdfefe, #e9ecef); border-radius: var(--border-radius-game);
+        border: 3px solid var(--text-dark); box-shadow: var(--shadow-chunky); padding: 1.5em;
+        text-align: center; cursor: pointer; position: relative; color: var(--text-dark);
+        display: flex; flex-direction: column; height: 100%; 
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .game-card-item:hover .game-card-content {
+        transform: translateY(-8px) scale(1.03);
+        box-shadow: 6px 6px 0px var(--blyza-sunny-yellow);
+        border-color: var(--blyza-orange-primary);
+    }
+    .game-icon { 
+        font-size: 3rem; color: var(--blyza-orange-primary); margin: 0 auto 0.5em; 
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease;
+    }
+    .game-card-item:hover .game-icon { transform: scale(1.25) rotate(15deg); color: var(--blyza-neon-pink); }
+    .game-title { font-family: var(--font-heading-alt); font-size: 1.5rem; color: var(--text-dark); margin-bottom: 0.5em; }
+    .game-title a { color: inherit; text-decoration: none; }
+    .game-description { color: var(--text-medium); font-size: 0.95rem; margin-bottom: 1em; flex-grow: 1; }
+    .game-stats { display: flex; justify-content: center; gap: 15px; font-size: 0.85rem; font-weight: 600; margin-top: auto; }
+    .game-stat { background-color: rgba(0,0,0,0.05); padding: 0.3em 0.8em; border-radius: 50px; }
+    .game-stat i { margin-right: 5px; color: var(--blyza-purple-secondary); }
+    
+    .category-tag {
+        position: absolute; top: 12px; right: -8px; 
+        color: var(--text-light); padding: 0.4em 1em; border-radius: 5px 0 0 5px;
+        font-size: 0.8rem; font-weight: 700; border: 2px solid var(--black-stroke);
+        text-transform: uppercase; box-shadow: -2px 2px 0 var(--black-stroke);
+    }
+    .game-card-item[data-category="Social & Deception"] .category-tag { background: var(--blyza-keppel-accent); }
+    .game-card-item[data-category="Brain Busters"] .category-tag { background: var(--blyza-brainy-blue); }
+    .game-card-item[data-category="Quickfire"] .category-tag { background: var(--blyza-quickfire-red); }
+
+    @keyframes floatCard { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .games-grid .game-card-item:nth-child(even) { animation-delay: 1.5s; }
+    .games-grid .game-card-item:nth-child(3n) { animation-delay: 0.8s; }
+
+    /* --- Floating Buttons (Retro Style) --- */
+    .btn-retro-floating {
+        font-family: var(--font-heading-alt); font-size: 1.1rem; padding: 0.7em 1.5em;
+        border: 3px solid var(--black-stroke); text-transform: uppercase; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 10px; transition: transform 0.1s ease, box-shadow 0.1s ease;
+        letter-spacing: 1px; cursor: pointer;
+    }
+    .btn-retro-floating:hover { transform: translate(2px, 2px); }
+    .btn-retro-floating:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px var(--black-stroke); }
+    .store-btn-container { position: fixed; top: 20px; right: 20px; z-index: 100; }
+    .store-btn { background-color: var(--blyza-sunny-yellow); color: var(--text-dark); box-shadow: 4px 4px 0px var(--black-stroke); border-radius: 8px; }
+    .store-btn:hover { box-shadow: 2px 2px 0px var(--black-stroke); }
+    .top-left-buttons-container { position: fixed; top: 20px; left: 20px; z-index: 100; display: flex; gap: 10px; }
+    .settings-btn, .favorites-btn {
+        background-color: var(--blyza-purple-secondary); color: var(--text-light); box-shadow: 4px 4px 0px var(--black-stroke);
+        border-radius: 50%; width: 55px; height: 55px; padding: 0; justify-content: center;
+    }
+    .favorites-btn { background-color: var(--blyza-neon-pink); }
+    .settings-btn:hover, .favorites-btn:hover { box-shadow: 2px 2px 0px var(--black-stroke); }
+
+    /* --- Modal Styles (Updated) --- */
+    .modal {
+        position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+        display: none; justify-content: center; align-items: center;
+    }
+    .modal-content {
+        background-color: var(--darker-grey-bg); margin: auto; padding: 25px;
+        border: 3px solid var(--black-stroke); border-radius: var(--border-radius-game);
+        width: 90%; max-width: 450px; box-shadow: 8px 8px 0px rgba(0,0,0,0.4);
+        position: relative; color: var(--text-light);
+    }
+    .modal-content h2 {
+        font-family: var(--font-logo); color: var(--blyza-orange-primary);
+        -webkit-text-stroke: 1.5px var(--black-stroke); text-stroke: 1.5px var(--black-stroke);
+        text-align: center; margin-bottom: 25px; font-size: 2rem;
+    }
+    .setting-item, .favorites-list li { margin-bottom: 18px; display: flex; flex-direction: column; }
+    .setting-item label { margin-bottom: 10px; font-weight: 600; font-size: 1rem; }
+    .close-modal-btn { color: #aaa; position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s; }
+    .close-modal-btn:hover { color: var(--text-light); }
+    .modal-content button.sfx-toggle {
+        font-family: var(--font-heading-alt); background: var(--blyza-keppel-accent);
+        color: var(--text-light); border: 2px solid var(--black-stroke); padding: 10px 20px;
+        font-size: 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+    }
+    .modal-content button.sfx-toggle:hover { transform: translateY(-2px); }
+    .modal-content button.sfx-toggle.off { background: var(--blyza-neon-pink); }
+    input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+    input[type=range]:focus { outline: none; }
+    input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; cursor: pointer; background: rgba(0,0,0,0.3); border-radius: 5px; border: 2px solid var(--black-stroke); }
+    input[type=range]::-webkit-slider-thumb { border: 2px solid var(--black-stroke); height: 22px; width: 22px; border-radius: 50%; background: var(--blyza-orange-primary); cursor: pointer; -webkit-appearance: none; margin-top: -9px; }
+
+    /* New Favorites Modal Styles */
+    .favorites-list { list-style: none; padding: 0; max-height: 50vh; overflow-y: auto; }
+    .favorites-list li {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 12px 15px;
+        border-radius: 8px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        border: 2px solid var(--blyza-purple-secondary);
+    }
+    .favorites-list .game-name { font-weight: 700; font-size: 1.1rem; }
+    .favorites-list .play-count { font-family: var(--font-logo); font-size: 1.3rem; color: var(--blyza-sunny-yellow); }
+    .no-favorites-message { text-align: center; color: var(--text-medium); font-weight: 500; }
+
+    /* --- NEW --- Welcome/Cookie Modal --- */
+    #welcome-modal-overlay {
+        z-index: 3000; /* Highest z-index to be on top of everything */
+        backdrop-filter: blur(8px);
+    }
+    .welcome-modal-content {
+        max-width: 500px;
+        text-align: center;
+        background: var(--bg-dark-start);
+        border-color: var(--blyza-sunny-yellow);
+    }
+    .welcome-text {
+        font-size: 1rem;
+        color: var(--text-light);
+        margin-bottom: 30px;
+        line-height: 1.7;
+        font-weight: 500;
+    }
+    #accept-cookies-btn {
+        background-color: var(--blyza-keppel-accent);
+        color: var(--text-light);
+        box-shadow: 4px 4px 0px var(--black-stroke);
+        border-radius: 8px;
+        width: 80%;
+        margin: 0 auto;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+    #accept-cookies-btn:hover {
+        box-shadow: 2px 2px 0px var(--black-stroke);
+    }
+
+    @media (max-width: 767.98px) {
+        .page-header { padding: 80px 15px 30px; }
+        .games-grid { grid-template-columns: 1fr; gap: 2em; }
+        .store-btn-container { top: 15px; right: 15px; }
+        .top-left-buttons-container { top: 15px; left: 15px; }
+        .btn-retro-floating { font-size: 1rem; padding: 0.6em 1.2em; }
+        .settings-btn, .favorites-btn { width: 48px; height: 48px; }
+        .bg-game-element { display: none; }
+        #surprise-me-btn { font-size: 0.9rem; padding: 10px 15px; }
+    }
