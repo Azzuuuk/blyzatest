@@ -3,15 +3,15 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Script from 'next/script';
 // --- NEW: Firebase Imports ---
-import { auth, db } from '../firebase'; // Make sure this path is correct
+import { auth, db } from '/firebase'; // Make sure this path is correct
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { ref, set, onValue, update, remove, onDisconnect } from 'firebase/database';
 
 // --- NEW: Import the components you will create in Part 2 ---
-import MultiplayerStartScreen from '../components/MultiplayerStartScreen';
-import LobbyScreen from '../components/LobbyScreen';
-import OnlineGameScreen from '../components/OnlineGameScreen';
-import OnlineResultsScreen from '../components/OnlineResultsScreen';
+import MultiplayerStartScreen from '/components/MultiplayerStartScreen';
+import LobbyScreen from '/components/LobbyScreen';
+import OnlineGameScreen from '/components/OnlineGameScreen';
+import OnlineResultsScreen from '/components/OnlineResultsScreen';
 
 // --- Static Game Data (Your existing data, unchanged) ---
 const itemsData = [
