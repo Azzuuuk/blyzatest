@@ -34,7 +34,7 @@ export default function OnlineGameScreen({ user, gameId, gameState, mediaItems, 
     const submitChoice = (choice) => {
         if (hasGuessed) return;
         playSound(sfxRefs.interaction);
-        const guessRef = ref(db, `games/${gameId}/rounds/${gameState.currentRound}/guesses/${user.uid}`);
+        const guessRef = ref(db, `game_sessions/${gameId}/rounds/${gameState.currentRound}/guesses/${user.uid}`);
         set(guessRef, choice); // 'real' or 'ai'
     };
 
@@ -63,7 +63,7 @@ export default function OnlineGameScreen({ user, gameId, gameState, mediaItems, 
         updates[`/rounds/${gameState.currentRound}/isAI`] = correctAnswer; // Store the correct answer for the results screen
 
         // This line will now work correctly because `update` is imported.
-        update(ref(db, `games/${gameId}`), updates);
+        update(ref(db, `game_sessions/${gameId}`), updates);
         
         // Show a summary toast
         if (correctPlayers === 0) {

@@ -24,20 +24,20 @@ export default function OnlineResultsScreen({ user, gameId, gameState, mediaItem
         playSound(sfxRefs.interaction);
 
         if (isGameOver) {
-            update(ref(db, `games/${gameId}`), { status: 'game-over' });
+            update(ref(db, `game_sessions/${gameId}`), { status: 'game-over' });
             return;
         }
 
         const usedIndexes = gameState.usedItemIndexes || [];
         let availableItems = mediaItems.map((_, i) => i).filter(i => !usedIndexes.includes(i));
         if (availableItems.length === 0) {
-             update(ref(db, `games/${gameId}`), { status: 'game-over' });
+             update(ref(db, `game_sessions/${gameId}`), { status: 'game-over' });
              return;
         }
         
         const nextItemIndex = availableItems[Math.floor(Math.random() * availableItems.length)];
         
-        update(ref(db, `games/${gameId}`), {
+        update(ref(db, `game_sessions/${gameId}`), {
             status: 'in-game',
             currentRound: gameState.currentRound + 1,
             currentItemIndex: nextItemIndex,

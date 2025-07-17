@@ -508,7 +508,7 @@ export default function RealOrAIPage() {
             setGameState(null);
             return;
         }
-        const gameRef = ref(db, `games/${gameId}`);
+        const gameRef = ref(db, `game_sessions/${gameId}`);
         const unsubscribe = onValue(gameRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -519,7 +519,7 @@ export default function RealOrAIPage() {
                 showToast("The game session has ended.", "info");
             }
         });
-        const playerRef = ref(db, `games/${gameId}/players/${user.uid}`);
+        const playerRef = ref(db, `game_sessions/${gameId}/players/${user.uid}`);
         onDisconnect(playerRef).remove();
         return () => unsubscribe();
     }, [playMode, gameId, user, showToast]);
@@ -527,7 +527,7 @@ export default function RealOrAIPage() {
     const createGame = useCallback(async (playerName) => {
         if (!user) return showToast("Authentication error, please wait.", "wrong");
         const newGameId = Math.random().toString(36).substring(2, 7).toUpperCase();
-        const gameRef = ref(db, `games/${newGameId}`);
+        const gameRef = ref(db, `game_sessions/${newGameId}`);
         const newGameData = {
             gameType: 'realOrAI',  // Different gameType
             hostId: user.uid,
@@ -547,12 +547,12 @@ export default function RealOrAIPage() {
 
     const joinGame = useCallback((idToJoin, playerName) => {
         if (!user) return showToast("Authentication error, please wait.", "wrong");
-        const gameRef = ref(db, `games/${idToJoin}`);
+        const gameRef = ref(db, `game_sessions/${idToJoin}`);
         onValue(gameRef, async (snapshot) => {
             if (snapshot.exists()) {
                 const gameData = snapshot.val();
                 if (gameData.status === 'lobby') {
-                    const playerRef = ref(db, `games/${idToJoin}/players/${user.uid}`);
+                    const playerRef = ref(db, `game_sessions/${idToJoin}/players/${user.uid}`);
                     await set(playerRef, { name: playerName, score: 0 });
                     setGameId(idToJoin);
                 } else {
@@ -569,7 +569,7 @@ export default function RealOrAIPage() {
         if (gameState.hostId === user.uid) {
             remove(ref(db, `games/${gameId}`));
         } else {
-            remove(ref(db, `games/${gameId}/players/${user.uid}`));
+            remove(ref(db, `game_sessions/${gameId}/players/${user.uid}`));
         }
         setGameId(null);
         setGameState(null);
@@ -584,7 +584,7 @@ export default function RealOrAIPage() {
             status: 'in-game', currentRound: 1, currentItemIndex: firstItemIndex, usedItemIndexes: [firstItemIndex],
             ...players.reduce((acc, uid) => { acc[`/players/${uid}/score`] = 0; return acc; }, {})
         };
-        update(ref(db, `games/${gameId}`), updates);
+        update(ref(db, `game_sessions/${gameId}`), updates);
     }, [gameState, user, gameId, playSound, sfxRefs.start]);
 
     const goBackToModeSelect = useCallback(() => {
