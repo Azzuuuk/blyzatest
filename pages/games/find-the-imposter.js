@@ -221,17 +221,54 @@ export default function FindTheImposterPage() {
         return () => unsubscribe();
     }, [playMode, gameId, user]);
 
+    // In pages/find-the-imposter.js (place this after your other useEffect hooks)
+useEffect(() => {
+    // This effect is the "Game Manager" and only runs for the host.
+    if (!gameState || !user || gameState.hostId !== user.uid) {
+        return;
+    }
+
+    const gameRef = ref(db, `game_sessions/${gameId}`);
+    const totalPlayers = Object.keys(gameState.players || {}).length;
+
+    // Condition to move from Role Assignment to Discussion
+    if (gameState.status === 'role-assignment' && gameState.gameData?.seenRole) {
+        const playersWhoHaveSeen = Object.keys(gameState.gameData.seenRole).length;
+        if (playersWhoHaveSeen === totalPlayers && totalPlayers > 0) {
+            // Once everyone has seen their role, the HOST changes the status.
+            update(gameRef, { status: 'discussion' });
+        }
+    }
+
+    // You can add more manager logic here for other stages, like voting -> results
+    
+}, [gameState, user, gameId]); // This hook re-runs whenever the gameState changes.
+
     // --- Local Game Logic (Unchanged) ---
     const selectNewQuestion = () => { let available = questionsData.map((_, i) => i).filter(i => !usedQuestionIndices.includes(i)); if (available.length === 0) { setUsedQuestionIndices([]); available = questionsData.map((_, i) => i); } const newIndex = available[Math.floor(Math.random() * available.length)]; setUsedQuestionIndices(prev => [...prev, newIndex]); setQuestion(questionsData[newIndex]); };
     const handleStartGame = () => { playSound(sfxRefs.start); const validPlayers = players.map(p => p.trim()).filter(Boolean); if (validPlayers.length < MIN_PLAYERS) return; setPlayers(validPlayers); setImposterIndex(Math.floor(Math.random() * validPlayers.length)); selectNewQuestion(); setCurrentPlayerIndex(0); setCardFlipped(false); setVoterIndex(0); setVotes({}); setResult(null); setIsTransitioning(false); setScreen(GameScreen.ROLE); };
-    const handleNextPlayer = () => { if (isTransitioning || !cardFlipped) return; playSound(sfxRefs.interaction); setIsTransitioning(true); setCardFlipped(false); };
+// In pages/find-the-imposter.js
+const handleNextPlayer = () => {
+    // This function is for the LOCAL game only.
+    if (isTransitioning || !cardFlipped) return;
+    playSound(sfxRefs.interaction);
+    setIsTransitioning(true);
+    setCardFlipped(false); // This triggers the card to flip back
+};
 // In pages/find-the-imposter.js
 
+// In pages/find-the-imposter.js
 const handleTransitionEnd = () => {
+    // This function is for the LOCAL game only.
+    // It runs AFTER the card flip animation is finished.
     if (isTransitioning && !cardFlipped) {
-        // We only advance the player index. We will NOT change the screen here.
+        // Check if there are more players
         if (currentPlayerIndex < players.length - 1) {
+            // If yes, just advance to the next player
             setCurrentPlayerIndex(prev => prev + 1);
+        } else {
+            // If this was the LAST player, go to the discussion screen
+            setScreen(GameScreen.DISCUSSION);
         }
         setIsTransitioning(false);
     }
@@ -254,36 +291,29 @@ const handleStartDiscussion = () => {
 
    // In pages/find-the-imposter.js
 
+// In pages/find-the-imposter.js
 const startOnlineGame = async () => {
     if (!user || !gameState || gameState.hostId !== user.uid) return;
     
     const gameRef = ref(db, `game_sessions/${gameId}`);
-    
-    const playersObject = gameState.players || {};
-    const playerIds = Object.keys(playersObject); // Get an array of player UIDs
-    
-    if (playerIds.length < MIN_PLAYERS) {
-        alert(`You need at least ${MIN_PLAYERS} players to start.`);
-        return;
-    }
+    const playerIds = Object.keys(gameState.players || {});
+    if (playerIds.length < MIN_PLAYERS) return alert(`Need at least ${MIN_PLAYERS} players.`);
 
-    // --- THIS IS THE CORRECTED LOGIC ---
-    const imposterIndex = Math.floor(Math.random() * playerIds.length);
-    const imposterUid = playerIds[imposterIndex]; // Get the actual UID of the imposter
+    const imposterUid = playerIds[Math.floor(Math.random() * playerIds.length)];
     const questionIndex = Math.floor(Math.random() * questionsData.length);
     
     try {
         await update(gameRef, {
             status: 'role-assignment',
             gameData: {
-                imposterUid: imposterUid, // <-- FIX: Save the UID, not the index
+                imposterUid: imposterUid,
                 question: questionsData[questionIndex],
+                turnOrder: playerIds.sort(() => 0.5 - Math.random()),
                 currentPlayerTurnIndex: 0,
-                turnOrder: playerIds.sort(() => Math.random() - 0.5), // Shuffle turn order for fairness
-                seenRole: {},
+                seenRole: {}, // Crucial: Initialize as an empty object
                 cardFlipped: false,
-                votes: {}, // Initialize votes object
-                mostVotedUid: null // Initialize mostVotedUid
+                votes: {}, // Crucial: Initialize for later
+                mostVotedUid: null // Crucial: Initialize for later
             }
         });
     } catch (error) {
