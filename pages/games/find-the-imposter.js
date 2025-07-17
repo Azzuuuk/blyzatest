@@ -251,43 +251,45 @@ const startOnlineGame = async () => {
         alert("Error starting game. Please try again.");
     }
 };
-    const handleNextPlayerOnline = async () => {
-        if (!gameState?.gameData || !user) return;
-        
-        const { currentPlayerTurnIndex, turnOrder } = gameState.gameData;
-        const isMyTurn = turnOrder[currentPlayerTurnIndex] === user.uid;
-        
-        if (!isMyTurn) return;
-        
-        try {
-            // First mark card as not flipped for next player
-            await update(ref(db, `game_sessions/${gameId}/gameData`), {
-                cardFlipped: false
-            });
+    // In pages/find-the-imposter.js
 
-            // Mark that this player has seen their role
-            await update(ref(db, `game_sessions/${gameId}/gameData/seenRole`), {
-                [user.uid]: true
-            });
-            
-            // If we're the last player, move to discussion
-            if (currentPlayerTurnIndex === turnOrder.length - 1) {
-                
-                    await update(ref(db, `game_sessions/${gameId}`), {
-                        status: 'discussion'
-                    });
-                
-            } else {
-                // Otherwise, increment the turn index
-                await update(ref(db, `game_sessions/${gameId}/gameData`), {
-                    currentPlayerTurnIndex: currentPlayerTurnIndex + 1
-                });
-            }
-        } catch (error) {
-            console.error("Failed to progress turn:", error);
-            alert("Error updating game state. Please try again.");
+const handleNextPlayerOnline = async () => {
+    if (!gameState?.gameData || !user) return;
+
+    const { currentPlayerTurnIndex, turnOrder } = gameState.gameData;
+    const isMyTurn = turnOrder[currentPlayerTurnIndex] === user.uid;
+
+    if (!isMyTurn) return;
+
+    try {
+        // --- THIS IS THE KEY CHANGE ---
+        // We will build a single 'updates' object for an atomic operation.
+        const updates = {};
+
+        // 1. Mark that this player has seen their role.
+        updates[`/gameData/seenRole/${user.uid}`] = true;
+
+        // 2. Flip the card back for the next state.
+        updates['/gameData/cardFlipped'] = false;
+
+        // 3. Check if this is the last player's turn.
+        if (currentPlayerTurnIndex === turnOrder.length - 1) {
+            // If it is, change the game status to discussion.
+            updates['/status'] = 'discussion';
+        } else {
+            // If not, just advance the turn index.
+            updates['/gameData/currentPlayerTurnIndex'] = currentPlayerTurnIndex + 1;
         }
-    };
+
+        // 4. Send all changes to Firebase in ONE atomic operation.
+        const gameRef = ref(db, `game_sessions/${gameId}`);
+        await update(gameRef, updates);
+
+    } catch (error) {
+        console.error("Failed to progress turn:", error);
+        alert("Error updating game state. Please check your connection and try again.");
+    }
+};
 
     const handleOnlineCardFlip = async () => {
         if (!gameState?.gameData || !user) return;
