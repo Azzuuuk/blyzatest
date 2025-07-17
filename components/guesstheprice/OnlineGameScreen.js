@@ -22,7 +22,7 @@ export default function OnlineGameScreen({ user, gameId, gameState, itemsData, d
     const submitGuess = () => {
         if (guess === '' || hasGuessed) return;
         playSound(sfxRefs.interaction);
-        const guessRef = ref(db, `games/${gameId}/rounds/${gameState.currentRound}/guesses/${user.uid}`);
+        const guessRef = ref(db, `game_sessions/${gameId}/rounds/${gameState.currentRound}/guesses/${user.uid}`);
         set(guessRef, parseFloat(guess));
     };
 
@@ -50,7 +50,7 @@ export default function OnlineGameScreen({ user, gameId, gameState, itemsData, d
             showToast('A tie! No points awarded.', 'wrong');
             playSound(sfxRefs.wrong);
         }
-        update(ref(db, `games/${gameId}`), updates);
+        update(ref(db, `game_sessions/${gameId}`), updates);
     };
 
     return (

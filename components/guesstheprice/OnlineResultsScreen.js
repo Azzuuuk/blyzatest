@@ -16,7 +16,7 @@ export default function OnlineResultsScreen({ user, gameId, gameState, itemsData
         playSound(sfxRefs.interaction);
 
         if (isGameOver) {
-            update(ref(db, `games/${gameId}`), { status: 'game-over' });
+            update(ref(db, `game_sessions/${gameId}`), { status: 'game-over' });
             return;
         }
 
@@ -26,7 +26,7 @@ export default function OnlineResultsScreen({ user, gameId, gameState, itemsData
         
         const nextItemIndex = availableItems[Math.floor(Math.random() * availableItems.length)];
         
-        update(ref(db, `games/${gameId}`), {
+        update(ref(db, `game_sessions/${gameId}`), {
             status: 'in-game',
             currentRound: gameState.currentRound + 1,
             currentItemIndex: nextItemIndex,

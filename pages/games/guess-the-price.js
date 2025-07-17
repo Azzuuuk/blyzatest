@@ -5,13 +5,13 @@ import Script from 'next/script';
 // --- NEW: Firebase Imports ---
 import { auth, db } from '/firebase'; // Make sure this path is correct
 import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { ref, set, onValue, update, remove, onDisconnect } from 'firebase/database';
+import { ref, set, onValue, update, remove, onDisconnect, serverTimestamp } from 'firebase/database';
 
 // --- NEW: Import the components you will create in Part 2 ---
 import MultiplayerStartScreen from '/components/MultiplayerStartScreen';
 import LobbyScreen from '/components/LobbyScreen';
-import OnlineGameScreen from '/components/OnlineGameScreen';
-import OnlineResultsScreen from '/components/OnlineResultsScreen';
+import OnlineGameScreen from '/components/guesstheprice/OnlineGameScreen';
+import OnlineResultsScreen from '/components/guesstheprice/OnlineResultsScreen';
 
 // --- Static Game Data (Your existing data, unchanged) ---
 const itemsData = [
@@ -505,7 +505,7 @@ useEffect(() => {
             setGameState(null);
             return;
         }
-        const gameRef = ref(db, `games/${gameId}`);
+        const gameRef = ref(db, `game_sessions/${gameId}`);
         const unsubscribe = onValue(gameRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
@@ -516,7 +516,7 @@ useEffect(() => {
                 showToast("The game session has ended.", "info");
             }
         });
-        const playerRef = ref(db, `games/${gameId}/players/${user.uid}`);
+        const playerRef = ref(db, `game_sessions/${gameId}/players/${user.uid}`);
         onDisconnect(playerRef).remove();
         return () => unsubscribe();
     }, [playMode, gameId, user]);
@@ -524,10 +524,19 @@ useEffect(() => {
     const createGame = async (playerName) => {
         if (!user) return showToast("Authentication error, please wait a moment.", "wrong");
         const newGameId = Math.random().toString(36).substring(2, 7).toUpperCase();
-        const gameRef = ref(db, `games/${newGameId}`);
+        const gameRef = ref(db, `game_sessions/${newGameId}`);
         const initialGameState = {
-            hostId: user.uid, status: 'lobby', createdAt: Date.now(),
-            players: { [user.uid]: { name: playerName, score: 0 } }
+            gameType: 'guessThePrice',  // Different gameType
+            hostId: user.uid,
+            status: 'lobby',
+            createdAt: serverTimestamp(),
+            gameData: null,
+            players: {
+                [user.uid]: {
+                    name: playerName.trim(),
+                    uid: user.uid
+                }
+            }
         };
         await set(gameRef, initialGameState);
         setGameId(newGameId);
@@ -546,7 +555,7 @@ const joinGame = (idToJoin, playerName) => {
         return;
     }
 
-    const gameRef = ref(db, `games/${idToJoin}`);
+    const gameRef = ref(db, `game_sessions/${idToJoin}`);
     console.log("Created database reference to:", gameRef.toString());
 
     // Using onValue to check the game's status
@@ -561,7 +570,7 @@ const joinGame = (idToJoin, playerName) => {
             if (gameData.status === 'lobby') {
                 console.log("SUCCESS: Game is in lobby. Attempting to add player.");
                 try {
-                    const playerRef = ref(db, `games/${idToJoin}/players/${user.uid}`);
+                    const playerRef = ref(db, `game_sessions/${idToJoin}/players/${user.uid}`);
                     await set(playerRef, { name: playerName, score: 0 });
                     console.log("Successfully added player to database.");
                     
@@ -588,9 +597,9 @@ const joinGame = (idToJoin, playerName) => {
     const leaveGame = () => {
         if (!user || !gameId || !gameState) return;
         if (gameState.hostId === user.uid) {
-            remove(ref(db, `games/${gameId}`));
+            remove(ref(db, `game_sessions/${gameId}`));
         } else {
-            remove(ref(db, `games/${gameId}/players/${user.uid}`));
+            remove(ref(db, `game_sessions/${gameId}/players/${user.uid}`));
         }
         setGameId(null);
         setGameState(null);
@@ -625,7 +634,7 @@ const startGame = () => {
         }, {})
     };
 
-    update(ref(db, `games/${gameId}`), updates);
+    update(ref(db, `game_sessions/${gameId}`), updates);
 };
 
 // ... rest of your file ...
