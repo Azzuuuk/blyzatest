@@ -57,14 +57,27 @@ const StartScreenComponent = ({ players, setPlayers, handleStartGame, playSound,
         <button id="start-game-btn" className="btn-primary" onClick={handleStartGame} disabled={players.filter(p => p.trim()).length < MIN_PLAYERS}>Start Game <i className="fas fa-play"></i></button>
     </div>
 );
-const RoleScreenComponent = ({ players, currentPlayerIndex, imposterIndex, question, cardFlipped, setCardFlipped, handleNextPlayer, playSound, sfxRefs, handleTransitionEnd }) => {
+// In pages/find-the-imposter.js
+
+// Find the definition for RoleScreenComponent
+const RoleScreenComponent = ({ players, currentPlayerIndex, imposterIndex, question, cardFlipped, setCardFlipped, handleNextPlayer, playSound, sfxRefs, handleTransitionEnd, allRolesAssigned, handleStartDiscussion }) => { // Add new props here
     const isImposter = currentPlayerIndex === imposterIndex;
     const handleCardClick = () => { if (!cardFlipped) { playSound(sfxRefs.flip); setCardFlipped(true); } };
+
     return (
         <div id="role-screen" className="screen active">
             <h1>Assigning Roles</h1>
-            <div id="current-player-info">Pass to <strong>{players[currentPlayerIndex] || '...'}</strong></div>
-            <p className="info-text">Click the card below to reveal your role. Keep it secret!</p>
+
+            {/* Conditionally render the 'Pass to...' text */}
+            {!allRolesAssigned && (
+                <div id="current-player-info">Pass to <strong>{players[currentPlayerIndex] || '...'}</strong></div>
+            )}
+
+            <p className="info-text">
+                {allRolesAssigned ? "All roles have been assigned!" : "Click the card below to reveal your role. Keep it secret!"}
+            </p>
+
+            {/* The card remains the same */}
             <div className={`role-card ${cardFlipped ? 'flipped' : ''}`} onClick={handleCardClick}>
                 <div className="role-card-inner" onTransitionEnd={handleTransitionEnd}>
                     <div className="role-card-front"><i className="fas fa-eye role-icon"></i><p>Click to Reveal</p></div>
@@ -74,9 +87,19 @@ const RoleScreenComponent = ({ players, currentPlayerIndex, imposterIndex, quest
                     </div>
                 </div>
             </div>
-            <button id="next-player-btn" className="btn-primary" onClick={handleNextPlayer} disabled={!cardFlipped}>
-                {currentPlayerIndex === players.length - 1 ? 'Start Discussion' : 'Next Player'} <i className="fas fa-arrow-right"></i>
-            </button>
+
+            {/* --- THIS IS THE KEY LOGIC CHANGE --- */}
+            {/* Show the 'Start Discussion' button when all roles are assigned */}
+            {allRolesAssigned ? (
+                <button id="start-discussion-btn" className="btn-primary" onClick={handleStartDiscussion}>
+                    Start Discussion <i className="fas fa-comments"></i>
+                </button>
+            ) : (
+                // Otherwise, show the 'Next Player' button
+                <button id="next-player-btn" className="btn-primary" onClick={handleNextPlayer} disabled={!cardFlipped}>
+                    {currentPlayerIndex === players.length - 1 ? 'Finish' : 'Next Player'} <i className="fas fa-arrow-right"></i>
+                </button>
+            )}
         </div>
     );
 };
@@ -202,12 +225,29 @@ export default function FindTheImposterPage() {
     const selectNewQuestion = () => { let available = questionsData.map((_, i) => i).filter(i => !usedQuestionIndices.includes(i)); if (available.length === 0) { setUsedQuestionIndices([]); available = questionsData.map((_, i) => i); } const newIndex = available[Math.floor(Math.random() * available.length)]; setUsedQuestionIndices(prev => [...prev, newIndex]); setQuestion(questionsData[newIndex]); };
     const handleStartGame = () => { playSound(sfxRefs.start); const validPlayers = players.map(p => p.trim()).filter(Boolean); if (validPlayers.length < MIN_PLAYERS) return; setPlayers(validPlayers); setImposterIndex(Math.floor(Math.random() * validPlayers.length)); selectNewQuestion(); setCurrentPlayerIndex(0); setCardFlipped(false); setVoterIndex(0); setVotes({}); setResult(null); setIsTransitioning(false); setScreen(GameScreen.ROLE); };
     const handleNextPlayer = () => { if (isTransitioning || !cardFlipped) return; playSound(sfxRefs.interaction); setIsTransitioning(true); setCardFlipped(false); };
-    const handleTransitionEnd = () => { if (isTransitioning && !cardFlipped) { if (currentPlayerIndex < players.length - 1) { setCurrentPlayerIndex(prev => prev + 1); } else { setScreen(GameScreen.DISCUSSION); } setIsTransitioning(false); } };
+// In pages/find-the-imposter.js
+
+const handleTransitionEnd = () => {
+    if (isTransitioning && !cardFlipped) {
+        // We only advance the player index. We will NOT change the screen here.
+        if (currentPlayerIndex < players.length - 1) {
+            setCurrentPlayerIndex(prev => prev + 1);
+        }
+        setIsTransitioning(false);
+    }
+};
     const handleStartVoting = () => { playSound(sfxRefs.interaction); setScreen(GameScreen.VOTING); };
     const handleLocalVote = (votedForPlayer) => { playSound(sfxRefs.interaction); const voter = players[voterIndex]; setVotes(prevVotes => ({ ...prevVotes, [voter]: votedForPlayer })); if (voterIndex < players.length - 1) { setVoterIndex(prev => prev + 1); } };
     const handleRevealLocal = () => { const voteCounts = Object.values(votes).reduce((acc, vote) => { acc[vote] = (acc[vote] || 0) + 1; return acc; }, {}); let maxVotes = 0; let mostVoted = ''; Object.entries(voteCounts).forEach(([player, count]) => { if (count > maxVotes) { maxVotes = count; mostVoted = player; } }); if (!mostVoted) mostVoted = "No one"; const imposter = players[imposterIndex]; const isCorrect = mostVoted === imposter; playSound(isCorrect ? sfxRefs.correct : sfxRefs.wrong); setResult({ mostVoted, imposter, isCorrect }); setScreen(GameScreen.RESULTS); };
     const handlePlayAgain = () => { playSound(sfxRefs.start); handleStartGame(); };
     const handleNewGame = () => { playSound(sfxRefs.interaction); setPlayers(Array(MIN_PLAYERS).fill('')); setScreen(GameScreen.START); };
+// In pages/find-the-imposter.js (add this near your other handle... functions)
+
+const handleStartDiscussion = () => {
+    playSound(sfxRefs.start);
+    setScreen(GameScreen.DISCUSSION);
+};
+
 
     // --- Online Game Logic ---
     const generateGameId = () => Math.random().toString(36).substring(2, 7).toUpperCase();
@@ -389,6 +429,7 @@ const handleNextPlayerOnline = async () => {
     // --- Render Logic ---
     const renderLocalGame = () => {
         const props = { players, setPlayers, handleStartGame, currentPlayerIndex, imposterIndex, question, cardFlipped, setCardFlipped, handleNextPlayer, handleStartVoting, votes, handleVote: handleLocalVote, voterIndex, handleReveal: handleRevealLocal, result, handlePlayAgain, handleNewGame, router, playSound, sfxRefs, handleTransitionEnd };
+       const allRolesAssigned = currentPlayerIndex === players.length - 1 && cardFlipped && !isTransitioning;
         switch(screen) {
             case GameScreen.START:      return <StartScreenComponent {...props} />;
             case GameScreen.ROLE:       return <RoleScreenComponent {...props} />;
