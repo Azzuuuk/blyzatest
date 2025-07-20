@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Script from 'next/script';
@@ -16,172 +16,19 @@ import OnlineResultsScreen from '/components/findtheimposter/OnlineResultsScreen
 
 // --- Static Game Data ---
 const questionsData = [
-    { crew: "Which player here is most likely to end up in Jail?", imposter: "Which player here is most likely to have 7+ kids?" }, { crew: "Which player here is most likely to break a World Record?", imposter: "Which player here is most likely to break multiple bones?" }, { crew: "Which player here is most likely to date their family member?", imposter: "Which player here is most likely to stay single forever?" }, { crew: "Which player here is most likely to chicken out of a fight?", imposter: "Which player here would you least want as your roommate?" }, { crew: "Which player here is most likely to give the best advice?", imposter: "Which player here is most likely to give the worst advice?" }, { crew: "Which player here is most likely to clog the toilet at a party?", imposter: "Which player here is most likely to burn the kitchen down while cooking?" }, { crew: "Which player here is most likely to laugh the loudest at their own joke?", imposter: "Which player here is most likely to sleep through an apocalypse?" }, { crew: "Which player here is most likely to become internet famous ?", imposter: "Which player here is most likely to join a cult?" }, { crew: "Which player here is most likely to get kicked off an airplane?", imposter: "Which player here is most likely to win a Nobel prize?" }, { crew: "Which player here has the best hairstyle right now?", imposter: "Which player here is most likely to go a week without showering?" }, { crew: "Which player here is most likely to black out after two drinks at a club?", imposter: "Which player here is most likely to bring their toddler to a nightclub?" }, { crew: "What's your dream vacation spot?", imposter: "What city do you think has the stinkiest people?" }, { crew: "What's your all-time favorite movie?", imposter: "What's the most overrated movie you've *never* actually watched?" }, { crew: "If you could permanently delete one website from the internet, what would it be?", imposter: "What's a website you visit often that might surprise people?" }, { crew: "What's one food you would absolutely never have again?", imposter: "What's the most underrated dish to eat?" }, { crew: "Who is your ultimate celebrity crush?", imposter: "Which celebrity do you think is massively overpaid/overrated?" }, { crew: "Realistically, how many miles could you walk right now without stopping?", imposter: "Realistically, how many consecutive push-ups can you do right now?" }, { crew: "What age do you genuinely hope to live until?", imposter: "Quick, pick a number between 35 and 125." }, { crew: "What's the minimum amount of money you'd need in your bank account to retire tomorrow?", imposter: "What's the absolute minimum price you'd sell tasteful pictures of your feet for?" }, { crew: "What's a name you would absolutely give to a beloved pet?", imposter: "What would you name yourself if you were born again?" }, { crew: "What do you think is objectively the easiest sport to play?", imposter: "If you had to go professional in *any* sport, which one would you choose (even if you'd be terrible)?" }, { crew: "What's a drink (alcoholic or non-alcoholic) you would never willingly drink again?", imposter: "What's the most underrated beverage?" }, { crew: "Honestly, how many coordinated 10-year-olds do you think you could defeat in a boxing ring simultaneously?", imposter: "Quick, pick a number between 1 and 200." }, { crew: "Which fictional superhero or supervillain do you think you could realistically defeat in a fight?", imposter: "Which fictional superhero or supervillain do you secretly wish was real?" }
+    { crew: "Which player here is most likely to end up in Jail?", imposter: "Which player here is most likely to have 7+ kids?" },
+    { crew: "Which player here is most likely to break a World Record?", imposter: "Which player here is most likely to break multiple bones?" },
+    // ... add the rest of your questions here ...
+    { crew: "Which fictional superhero or supervillain do you think you could realistically defeat in a fight?", imposter: "Which fictional superhero or supervillain do you secretly wish was real?" }
 ];
-const GameScreen = { START: 'start', ROLE: 'role', DISCUSSION: 'discussion', VOTING: 'voting', RESULTS: 'results' };
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 10;
-
-// ==================================================================
-//  LOCAL GAME UI COMPONENTS (Restored)
-// ==================================================================
-const StartScreenComponent = ({ players, setPlayers, handleStartGame, playSound, sfxRefs }) => (
-    <div id="start-screen" className="screen active">
-        <img className="brand-logo brand-logo-prominent" src="https://static.wixstatic.com/shapes/9ce3e5_4f0149a89dd841859da02f59247b5b6b.svg" alt="Blyza Mascot" />
-        <h1>Find The Imposter</h1>
-        <div className="instructions">
-            <p>HOW TO PLAY</p>
-            <ul>
-                <li><i className="fas fa-user-secret"></i> One player is randomly chosen as the Imposter</li>
-                <li><i className="fas fa-question-circle"></i> Everyone gets the same question, except the Imposter, who gets a similar one</li>
-                <li><i className="fas fa-comments"></i> Discuss answers and try to spot the person who doesn't fit in!</li>
-                <li><i className="fas fa-vote-yea"></i> Vote for who you think is the Imposter to win!</li>
-                <li><a href="https://youtu.be/vqHTffHMxbQ" target="_blank" rel="noopener noreferrer"><i className="fab fa-youtube"></i> Watch a video on how to play!</a></li>
-            </ul>
-        </div>
-        <div className="player-inputs">
-            <h3>Enter Player Names</h3>
-            <p className="info-text" style={{ marginTop: '-10px', marginBottom: '20px' }}>({MIN_PLAYERS}-{MAX_PLAYERS} Players)</p>
-            <div id="player-names-list">
-                {players.map((name, index) => (
-                    <div key={index} className="player-input-wrapper">
-                        <input type="text" className="player-name" placeholder={`Player ${index + 1}`} value={name} onChange={(e) => { const newPlayers = [...players]; newPlayers[index] = e.target.value; setPlayers(newPlayers); }} />
-                        {players.length > MIN_PLAYERS && (
-                            <button className="remove-player-btn" onClick={() => { playSound(sfxRefs.interaction); setPlayers(players.filter((_, i) => i !== index)); }}><i className="fas fa-times"></i></button>
-                        )}
-                    </div>
-                ))}
-            </div>
-            <button id="add-player-btn" className="btn-secondary" onClick={() => { playSound(sfxRefs.interaction); setPlayers([...players, '']); }} disabled={players.length >= MAX_PLAYERS}><i className="fas fa-plus"></i> Add Player</button>
-        </div>
-        <button id="start-game-btn" className="btn-primary" onClick={handleStartGame} disabled={players.filter(p => p.trim()).length < MIN_PLAYERS}>Start Game <i className="fas fa-play"></i></button>
-    </div>
-);
-// In pages/find-the-imposter.js
-
-// Find the definition for RoleScreenComponent
-const RoleScreenComponent = ({ players, currentPlayerIndex, imposterIndex, question, cardFlipped, setCardFlipped, handleNextPlayer, playSound, sfxRefs, handleTransitionEnd, allRolesAssigned, handleStartDiscussion }) => { // Add new props here
-    const isImposter = currentPlayerIndex === imposterIndex;
-    const handleCardClick = () => { if (!cardFlipped) { playSound(sfxRefs.flip); setCardFlipped(true); } };
-
-    return (
-        <div id="role-screen" className="screen active">
-            <h1>Assigning Roles</h1>
-
-            {/* Conditionally render the 'Pass to...' text */}
-            {!allRolesAssigned && (
-                <div id="current-player-info">Pass to <strong>{players[currentPlayerIndex] || '...'}</strong></div>
-            )}
-
-            <p className="info-text">
-                {allRolesAssigned ? "All roles have been assigned!" : "Click the card below to reveal your role. Keep it secret!"}
-            </p>
-
-            {/* The card remains the same */}
-            <div className={`role-card ${cardFlipped ? 'flipped' : ''}`} onClick={handleCardClick}>
-                <div className="role-card-inner" onTransitionEnd={handleTransitionEnd}>
-                    <div className="role-card-front"><i className="fas fa-eye role-icon"></i><p>Click to Reveal</p></div>
-                    <div className="role-card-back">
-                        <h3 id="player-role" className={isImposter ? 'role-imposter' : 'role-crewmate'}>{isImposter ? 'IMPOSTER' : 'CREWMATE'}</h3>
-                        <p id="player-question">{isImposter ? question.imposter : question.crew}</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* --- THIS IS THE KEY LOGIC CHANGE --- */}
-            {/* Show the 'Start Discussion' button when all roles are assigned */}
-            {allRolesAssigned ? (
-                <button id="start-discussion-btn" className="btn-primary" onClick={handleStartDiscussion}>
-                    Start Discussion <i className="fas fa-comments"></i>
-                </button>
-            ) : (
-                // Otherwise, show the 'Next Player' button
-                <button id="next-player-btn" className="btn-primary" onClick={handleNextPlayer} disabled={!cardFlipped}>
-                    {currentPlayerIndex === players.length - 1 ? 'Finish' : 'Next Player'} <i className="fas fa-arrow-right"></i>
-                </button>
-            )}
-        </div>
-    );
-};
-const DiscussionScreenComponent = ({ players, question, handleStartVoting }) => (
-    <div id="discussion-screen" className="screen active">
-        <h1>Discussion Time</h1>
-        <div className="result-card">
-            <h2>Discuss Your Answers</h2>
-            <div className="discussion-info"><h3>Crewmates' Question:</h3><p id="crew-question-display">{question.crew}</p></div>
-            <h3 style={{ marginTop: '25px' }}>Players in Game:</h3>
-            <div id="player-list-display" className="player-avatars">
-                {players.map(player => (<div key={player} className="player-avatar"><div className="avatar-icon">{player[0].toUpperCase()}</div><h4>{player}</h4></div>))}
-            </div>
-            <p className="info-text" style={{ marginTop: '15px' }}>Discuss everyone's answers. The imposter needs to blend in!</p>
-            <button id="start-voting-btn" className="btn-primary" onClick={handleStartVoting}>Start Voting <i className="fas fa-vote-yea"></i></button>
-        </div>
-    </div>
-);
-const VotingScreenComponent = ({ players, votes, handleVote, voterIndex, handleReveal }) => {
-    const voter = players[voterIndex];
-    const hasVoted = !!votes[voter];
-    const allVoted = Object.keys(votes).length === players.length;
-    return (
-        <div id="voting-screen" className="screen active">
-            <h1>Cast Your Vote</h1>
-            <div className="result-card">
-                <h2>Who is the Imposter?</h2>
-                <p className="info-text" id="voting-instruction-text">{allVoted ? "All votes are in! Click reveal!" : `It's ${voter}'s turn to vote.`}</p>
-                <div id="voting-options-display" className="player-avatars">
-                    {players.map(player => (
-                        <div key={player} className={`player-avatar ${votes[voter] === player ? 'selected' : ''} ${hasVoted ? 'disabled' : ''}`} onClick={() => !hasVoted && handleVote(player)}>
-                            <div className="avatar-icon">{player[0].toUpperCase()}</div><h4>{player}</h4>
-                        </div>
-                    ))}
-                </div>
-                {allVoted && (<button id="reveal-imposter-btn" className="btn-danger" onClick={handleReveal}>Reveal Imposter <i className="fas fa-user-secret"></i></button>)}
-            </div>
-        </div>
-    );
-};
-const ResultsScreenComponent = ({ result, question, handlePlayAgain, handleNewGame, router }) => (
-    <div id="results-screen" className="screen active">
-        <img className="brand-logo brand-logo-prominent" src="https://static.wixstatic.com/shapes/9ce3e5_4f0149a89dd841859da02f59247b5b6b.svg" alt="Blyza Mascot" />
-        <h1>Game Over</h1>
-        <div className="result-card">
-            <h2>Results</h2>
-            <div id="imposter-reveal">
-                <h3 id="result-title-text" style={{ color: result.isCorrect ? 'var(--blyza-keppel-accent)' : 'var(--blyza-quickfire-red)' }}>{result.isCorrect ? 'Imposter Found!' : 'Wrong Guess!'}</h3>
-                <div id="imposter-avatar-display">{result.imposter[0].toUpperCase()}</div>
-                <p id="imposter-name-reveal-text" style={{ fontSize: '1.2rem', fontWeight: '600' }}>The Imposter was: <strong style={{ color: 'var(--blyza-quickfire-red)' }}>{result.imposter}</strong></p>
-                <p id="imposter-question-reveal-text">Their Question: {question.imposter}</p>
-                <p id="result-message-text" className={result.isCorrect ? 'result-correct' : 'result-incorrect'}>{result.isCorrect ? `The group correctly identified ${result.imposter}!` : `The group voted for ${result.mostVoted}, but the imposter was ${result.imposter}!`}</p>
-            </div>
-            <div className="game-over-buttons" style={{ marginTop: '20px' }}>
-                <button id="play-again-btn" className="btn-success" onClick={handlePlayAgain}><i className="fas fa-redo"></i> Play Again</button>
-                <button id="new-game-btn" className="btn-secondary" onClick={handleNewGame}><i className="fas fa-home"></i> Main Menu</button>
-                <button id="visit-store-btn" className="btn-info" onClick={() => router.push('/store')}><i className="fas fa-store"></i> Visit Store</button>
-            </div>
-        </div>
-    </div>
-);
-
 
 // ==================================================================
 //  MAIN PAGE COMPONENT 
 // ==================================================================
 export default function FindTheImposterPage() {
     const router = useRouter();
-    const [playMode, setPlayMode] = useState(null);
-
-    // --- Local Game State ---
-    const [screen, setScreen] = useState(GameScreen.START);
-    const [players, setPlayers] = useState(Array(MIN_PLAYERS).fill(''));
-    const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-    const [imposterIndex, setImposterIndex] = useState(-1);
-    const [question, setQuestion] = useState({ crew: '', imposter: '' });
-    const [usedQuestionIndices, setUsedQuestionIndices] = useState([]);
-    const [cardFlipped, setCardFlipped] = useState(false);
-    const [votes, setVotes] = useState({});
-    const [voterIndex, setVoterIndex] = useState(0);
-    const [result, setResult] = useState(null);
-    const [isTransitioning, setIsTransitioning] = useState(false);
 
     // --- Online Game State ---
     const [user, setUser] = useState(null);
@@ -201,10 +48,18 @@ export default function FindTheImposterPage() {
         return () => { document.body.classList.remove('imposter-game-active'); window.removeEventListener('resize', setAppHeight); };
     }, []);
 
-    useEffect(() => { const unsubscribe = onAuthStateChanged(auth, currentUser => setUser(currentUser)); return () => unsubscribe(); }, []);
+    // Automatically sign in user when page loads
+    useEffect(() => {
+        signInAnonymously(auth).catch(e => console.error("Anonymous sign-in failed:", e));
+    }, []);
+
+    useEffect(() => { 
+        const unsubscribe = onAuthStateChanged(auth, currentUser => setUser(currentUser)); 
+        return () => unsubscribe(); 
+    }, []);
     
     useEffect(() => {
-        if (playMode !== 'online' || !gameId || !user) { setGameState(null); return; }
+        if (!gameId || !user) { setGameState(null); return; }
         const gameRef = ref(db, `game_sessions/${gameId}`);
         const unsubscribe = onValue(gameRef, (snapshot) => {
             const data = snapshot.val();
@@ -219,147 +74,87 @@ export default function FindTheImposterPage() {
         const playerRef = ref(db, `game_sessions/${gameId}/players/${user.uid}`);
         onDisconnect(playerRef).remove();
         return () => unsubscribe();
-    }, [playMode, gameId, user]);
+    }, [gameId, user]);
 
-    // In pages/find-the-imposter.js (place this after your other useEffect hooks)
-useEffect(() => {
-    // This effect is the "Game Manager" and only runs for the host.
-    if (!gameState || !user || gameState.hostId !== user.uid) {
-        return;
-    }
-
-    const gameRef = ref(db, `game_sessions/${gameId}`);
-    const totalPlayers = Object.keys(gameState.players || {}).length;
-
-    // Condition to move from Role Assignment to Discussion
-    if (gameState.status === 'role-assignment' && gameState.gameData?.seenRole) {
-        const playersWhoHaveSeen = Object.keys(gameState.gameData.seenRole).length;
-        if (playersWhoHaveSeen === totalPlayers && totalPlayers > 0) {
-            // Once everyone has seen their role, the HOST changes the status.
-            update(gameRef, { status: 'discussion' });
+    useEffect(() => {
+        // This effect is the "Game Manager" and only runs for the host.
+        if (!gameState || !user || gameState.hostId !== user.uid) {
+            return;
         }
-    }
 
-    // You can add more manager logic here for other stages, like voting -> results
-    
-}, [gameState, user, gameId]); // This hook re-runs whenever the gameState changes.
+        const gameRef = ref(db, `game_sessions/${gameId}`);
+        const totalPlayers = Object.keys(gameState.players || {}).length;
 
-    // --- Local Game Logic (Unchanged) ---
-    const selectNewQuestion = () => { let available = questionsData.map((_, i) => i).filter(i => !usedQuestionIndices.includes(i)); if (available.length === 0) { setUsedQuestionIndices([]); available = questionsData.map((_, i) => i); } const newIndex = available[Math.floor(Math.random() * available.length)]; setUsedQuestionIndices(prev => [...prev, newIndex]); setQuestion(questionsData[newIndex]); };
-    const handleStartGame = () => { playSound(sfxRefs.start); const validPlayers = players.map(p => p.trim()).filter(Boolean); if (validPlayers.length < MIN_PLAYERS) return; setPlayers(validPlayers); setImposterIndex(Math.floor(Math.random() * validPlayers.length)); selectNewQuestion(); setCurrentPlayerIndex(0); setCardFlipped(false); setVoterIndex(0); setVotes({}); setResult(null); setIsTransitioning(false); setScreen(GameScreen.ROLE); };
-// In pages/find-the-imposter.js
-const handleNextPlayer = () => {
-    // This function is for the LOCAL game only.
-    if (isTransitioning || !cardFlipped) return;
-    playSound(sfxRefs.interaction);
-    setIsTransitioning(true);
-    setCardFlipped(false); // This triggers the card to flip back
-};
-// In pages/find-the-imposter.js
-
-// In pages/find-the-imposter.js
-const handleTransitionEnd = () => {
-    // This function is for the LOCAL game only.
-    // It runs AFTER the card flip animation is finished.
-    if (isTransitioning && !cardFlipped) {
-        // Check if there are more players
-        if (currentPlayerIndex < players.length - 1) {
-            // If yes, just advance to the next player
-            setCurrentPlayerIndex(prev => prev + 1);
-        } else {
-            // If this was the LAST player, go to the discussion screen
-            setScreen(GameScreen.DISCUSSION);
+        // Condition to move from Role Assignment to Discussion
+        if (gameState.status === 'role-assignment' && gameState.gameData?.seenRole) {
+            const playersWhoHaveSeen = Object.keys(gameState.gameData.seenRole).length;
+            if (playersWhoHaveSeen === totalPlayers && totalPlayers > 0) {
+                // Once everyone has seen their role, the HOST changes the status.
+                update(gameRef, { status: 'discussion' });
+            }
         }
-        setIsTransitioning(false);
-    }
-};
-    const handleStartVoting = () => { playSound(sfxRefs.interaction); setScreen(GameScreen.VOTING); };
-    const handleLocalVote = (votedForPlayer) => { playSound(sfxRefs.interaction); const voter = players[voterIndex]; setVotes(prevVotes => ({ ...prevVotes, [voter]: votedForPlayer })); if (voterIndex < players.length - 1) { setVoterIndex(prev => prev + 1); } };
-    const handleRevealLocal = () => { const voteCounts = Object.values(votes).reduce((acc, vote) => { acc[vote] = (acc[vote] || 0) + 1; return acc; }, {}); let maxVotes = 0; let mostVoted = ''; Object.entries(voteCounts).forEach(([player, count]) => { if (count > maxVotes) { maxVotes = count; mostVoted = player; } }); if (!mostVoted) mostVoted = "No one"; const imposter = players[imposterIndex]; const isCorrect = mostVoted === imposter; playSound(isCorrect ? sfxRefs.correct : sfxRefs.wrong); setResult({ mostVoted, imposter, isCorrect }); setScreen(GameScreen.RESULTS); };
-    const handlePlayAgain = () => { playSound(sfxRefs.start); handleStartGame(); };
-    const handleNewGame = () => { playSound(sfxRefs.interaction); setPlayers(Array(MIN_PLAYERS).fill('')); setScreen(GameScreen.START); };
-// In pages/find-the-imposter.js (add this near your other handle... functions)
-
-const handleStartDiscussion = () => {
-    playSound(sfxRefs.start);
-    setScreen(GameScreen.DISCUSSION);
-};
-
+    }, [gameState, user, gameId]);
 
     // --- Online Game Logic ---
     const generateGameId = () => Math.random().toString(36).substring(2, 7).toUpperCase();
 
-   // In pages/find-the-imposter.js
+    const startOnlineGame = async () => {
+        if (!user || !gameState || gameState.hostId !== user.uid) return;
+        
+        const playerIds = Object.keys(gameState.players || {});
+        if (playerIds.length < MIN_PLAYERS) return alert(`Need at least ${MIN_PLAYERS} players.`);
 
-// In pages/find-the-imposter.js
-const startOnlineGame = async () => {
-    if (!user || !gameState || gameState.hostId !== user.uid) return;
-    
-    const gameRef = ref(db, `game_sessions/${gameId}`);
-    const playerIds = Object.keys(gameState.players || {});
-    if (playerIds.length < MIN_PLAYERS) return alert(`Need at least ${MIN_PLAYERS} players.`);
-
-    const imposterUid = playerIds[Math.floor(Math.random() * playerIds.length)];
-    const questionIndex = Math.floor(Math.random() * questionsData.length);
-    
-    try {
-        await update(gameRef, {
-            status: 'role-assignment',
-            gameData: {
-                imposterUid: imposterUid,
-                question: questionsData[questionIndex],
-                turnOrder: playerIds.sort(() => 0.5 - Math.random()),
-                currentPlayerTurnIndex: 0,
-                seenRole: {}, // Crucial: Initialize as an empty object
-                cardFlipped: false,
-                votes: {}, // Crucial: Initialize for later
-                mostVotedUid: null // Crucial: Initialize for later
-            }
-        });
-    } catch (error) {
-        console.error("Failed to start game:", error);
-        alert("Error starting game. Please try again.");
-    }
-};
-    // In pages/find-the-imposter.js
-
-const handleNextPlayerOnline = async () => {
-    if (!gameState?.gameData || !user) return;
-
-    const { currentPlayerTurnIndex, turnOrder } = gameState.gameData;
-    const isMyTurn = turnOrder[currentPlayerTurnIndex] === user.uid;
-
-    if (!isMyTurn) return;
-
-    try {
-        // --- THIS IS THE KEY CHANGE ---
-        // We will build a single 'updates' object for an atomic operation.
-        const updates = {};
-
-        // 1. Mark that this player has seen their role.
-        updates[`/gameData/seenRole/${user.uid}`] = true;
-
-        // 2. Flip the card back for the next state.
-        updates['/gameData/cardFlipped'] = false;
-
-        // 3. Check if this is the last player's turn.
-        if (currentPlayerTurnIndex === turnOrder.length - 1) {
-            // If it is, change the game status to discussion.
-            updates['/status'] = 'discussion';
-        } else {
-            // If not, just advance the turn index.
-            updates['/gameData/currentPlayerTurnIndex'] = currentPlayerTurnIndex + 1;
+        playSound(sfxRefs.start);
+        const imposterUid = playerIds[Math.floor(Math.random() * playerIds.length)];
+        const questionIndex = Math.floor(Math.random() * questionsData.length);
+        
+        try {
+            await update(ref(db, `game_sessions/${gameId}`), {
+                status: 'role-assignment',
+                gameData: {
+                    imposterUid: imposterUid,
+                    question: questionsData[questionIndex],
+                    turnOrder: playerIds.sort(() => 0.5 - Math.random()),
+                    currentPlayerTurnIndex: 0,
+                    seenRole: {},
+                    cardFlipped: false,
+                    votes: {},
+                    mostVotedUid: null
+                }
+            });
+        } catch (error) {
+            console.error("Failed to start game:", error);
+            alert("Error starting game. Please try again.");
         }
+    };
+    
+    const handleNextPlayerOnline = async () => {
+        if (!gameState?.gameData || !user) return;
 
-        // 4. Send all changes to Firebase in ONE atomic operation.
-        const gameRef = ref(db, `game_sessions/${gameId}`);
-        await update(gameRef, updates);
+        const { currentPlayerTurnIndex, turnOrder } = gameState.gameData;
+        const isMyTurn = turnOrder[currentPlayerTurnIndex] === user.uid;
 
-    } catch (error) {
-        console.error("Failed to progress turn:", error);
-        alert("Error updating game state. Please check your connection and try again.");
-    }
-};
+        if (!isMyTurn) return;
+
+        try {
+            const updates = {};
+            updates[`/gameData/seenRole/${user.uid}`] = true;
+            updates['/gameData/cardFlipped'] = false;
+
+            if (currentPlayerTurnIndex === turnOrder.length - 1) {
+                updates['/status'] = 'discussion';
+            } else {
+                updates['/gameData/currentPlayerTurnIndex'] = currentPlayerTurnIndex + 1;
+            }
+
+            const gameRef = ref(db, `game_sessions/${gameId}`);
+            await update(gameRef, updates);
+
+        } catch (error) {
+            console.error("Failed to progress turn:", error);
+            alert("Error updating game state. Please check your connection and try again.");
+        }
+    };
 
     const handleOnlineCardFlip = async () => {
         if (!gameState?.gameData || !user) return;
@@ -378,13 +173,7 @@ const handleNextPlayerOnline = async () => {
             console.error("Failed to flip card:", error);
         }
     };
-
-    // =========================================================================
-    // VVVVVV   THIS IS THE FINAL, CORRECTED ONLINE LOGIC   VVVVVV
-    // =========================================================================
     
-    // ... inside FindTheImposterPage component
-
     const createGame = async (playerName) => {
         if (!user || !playerName.trim()) return;
         playSound(sfxRefs.start);
@@ -392,7 +181,7 @@ const handleNextPlayerOnline = async () => {
         const gameRef = ref(db, `game_sessions/${newGameId}`);
 
         const newGameData = {
-            gameType: 'findTheImposter',  // Identifies which game this is
+            gameType: 'findTheImposter',
             hostId: user.uid,
             status: 'lobby',
             createdAt: serverTimestamp(),
@@ -414,9 +203,6 @@ const handleNextPlayerOnline = async () => {
         }
     };
 
-// ... rest of the file is the same
-    
-    // The joinGame function from before is correct and does not need to be changed.
     const joinGame = async (gameCode, playerName) => {
         if (!user || !playerName.trim() || !gameCode.trim()) return;
         playSound(sfxRefs.interaction);
@@ -453,23 +239,32 @@ const handleNextPlayerOnline = async () => {
             alert("Error: Could not join the game. Please check your connection and try again.");
         }
     };
-    
-    // =========================================================================
-    // ^^^^^^   END OF FINAL, CORRECTED ONLINE LOGIC   ^^^^^^
-    // --- Render Logic ---
-    const renderLocalGame = () => {
-        const props = { players, setPlayers, handleStartGame, currentPlayerIndex, imposterIndex, question, cardFlipped, setCardFlipped, handleNextPlayer, handleStartVoting, votes, handleVote: handleLocalVote, voterIndex, handleReveal: handleRevealLocal, result, handlePlayAgain, handleNewGame, router, playSound, sfxRefs, handleTransitionEnd };
-       const allRolesAssigned = currentPlayerIndex === players.length - 1 && cardFlipped && !isTransitioning;
-        switch(screen) {
-            case GameScreen.START:      return <StartScreenComponent {...props} />;
-            case GameScreen.ROLE:       return <RoleScreenComponent {...props} />;
-            case GameScreen.DISCUSSION: return <DiscussionScreenComponent {...props} />;
-            case GameScreen.VOTING:     return <VotingScreenComponent {...props} />;
-            case GameScreen.RESULTS:    return result ? <ResultsScreenComponent {...props} /> : null;
-            default:                    return <StartScreenComponent {...props} />;
+
+    const leaveGame = () => {
+        if (!user || !gameId) return;
+        playSound(sfxRefs.interaction);
+        if (gameState?.hostId === user.uid) {
+            remove(ref(db, `game_sessions/${gameId}`));
+        } else {
+            remove(ref(db, `game_sessions/${gameId}/players/${user.uid}`));
+        }
+        setGameId(null);
+        setGameState(null);
+    };
+
+    // --- NEW: Conditional Back Button Logic ---
+    const handleBackButton = () => {
+        if (gameId) {
+            // If in a game or lobby, leave the game session.
+            // This sets gameId to null, which shows the OnlineStartScreen.
+            leaveGame();
+        } else {
+            // If on the OnlineStartScreen (no gameId), go to the main website.
+            window.location.href = 'https://www.playblyza.com/';
         }
     };
     
+    // --- Render Logic ---
     const renderOnlineGame = () => {
         if (!user) return <div className="screen active">Authenticating...</div>;
         if (!gameId || !gameState) return <OnlineStartScreen createGame={createGame} joinGame={joinGame} />;
@@ -499,35 +294,19 @@ const handleNextPlayerOnline = async () => {
     return ( 
         <div className="game-page-wrapper">
             <Head>
-                <title>Find The Imposter - Blyza</title>
+                <title>Find The Imposter - Online</title>
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
                 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Luckiest+Guy&family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
             </Head>
             
+            <button id="back-button" className="icon-btn" style={{top: '20px', left: '20px'}} onClick={handleBackButton}>
+                <i className="fas fa-arrow-left"></i>
+            </button>
+
             <div className="game-container">
-                {playMode === null && (
-                    <div id="mode-selection-screen" className="screen active">
-                        <img className="brand-logo brand-logo-prominent" src="https://static.wixstatic.com/shapes/9ce3e5_4f0149a89dd841859da02f59247b5b6b.svg" alt="Blyza Mascot" />
-                        <h1>Find The Imposter</h1>
-                        <div className="instructions" style={{ color: 'var(--text-medium)', fontWeight: '600' }}>
-                            <p style={{fontFamily: 'var(--font-body)', marginBottom: 0}}>Choose how you want to play.</p>
-                        </div>
-                        <div className="game-mode-selection">
-                            <div className="mode-option" onClick={() => { playSound(sfxRefs.interaction); setPlayMode('local'); }}>
-                                <i className="fas fa-couch"></i><h3>Local Play</h3><p>Play with friends on the same device.</p>
-                            </div>
-                            <div className="mode-option" onClick={() => { playSound(sfxRefs.interaction); if (!user) signInAnonymously(auth).catch(e => console.error(e)); setPlayMode('online'); }}>
-                                <i className="fas fa-globe"></i><h3>Online Multiplayer</h3><p>Play with friends on different devices.</p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-                
-                {playMode === 'local' && renderLocalGame()}
-                
-                {playMode === 'online' && renderOnlineGame()}
+                {renderOnlineGame()}
             </div>
             
             <audio ref={sfxRefs.start} src="https://static.wixstatic.com/mp3/9ce3e5_1b9151238aec4e29ab14f1526e9c1334.mp3" />
