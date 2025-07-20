@@ -1,0 +1,444 @@
+  :root {
+            --blyza-orange-primary: #FF8833;
+            --blyza-purple-secondary: #cb7ae1;
+            --blyza-keppel-accent: #00BFA6;
+            --blyza-sunny-yellow: #FFDF00;
+            --blyza-quickfire-red: #EA2027;
+
+            --darker-grey-bg: #4A4A4A;
+            --text-light: #FDFEFE;
+            --text-dark: #2C3A47;
+            --text-medium: #535c68;
+            --black-stroke: #1A1A1A;
+
+            --font-logo: "Luckiest Guy", cursive;
+            --font-heading-alt: "Bungee", cursive;
+            --font-body: 'Quicksand', sans-serif;
+            --border-radius-game: 12px;
+            --shadow-chunky: 4px 4px 0px var(--black-stroke);
+        }
+        /* --- END: BRAND IDENTITY & ROOT VARIABLES --- */
+
+        /* --- Basic Reset & Body --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        /* --- CUSTOM SCROLLING BODY --- */
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            background: linear-gradient(135deg, var(--blyza-orange-primary) 0%, var(--blyza-purple-secondary) 100%);
+            line-height: 1.6;
+            overflow: hidden; /* Body does not scroll */
+            position: relative;
+            height: var(--app-height, 100vh); /* Full screen height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 10px;
+        }
+
+        /* --- Floating Background Elements (Themed for Box of Lies) --- */
+        .hero-background-elements { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events: none; }
+        .bg-game-element {
+            position: absolute; opacity: 0.1; color: var(--text-light);
+            animation: floatSimple 20s infinite ease-in-out alternate;
+            user-select: none;
+        }
+        .bg-box-1 { font-size: 150px; top: 10%; left: 5%; --initial-rotate: -15deg; animation-duration: 22s; }
+        .bg-question-1 { font-size: 100px; top: 65%; right: 8%; --initial-rotate: 10deg; animation-duration: 18s; }
+        .bg-lie-1 { font-size: 120px; top: 70%; left: 15%; --initial-rotate: 5deg; animation-duration: 25s; opacity: 0.08; }
+        .bg-truth-1 { font-size: 130px; top: 15%; right: 10%; --initial-rotate: 20deg; animation-duration: 16s; }
+        .bg-box-2 { font-size: 80px; top: 80%; right: 25%; --initial-rotate: 25deg; animation-duration: 15s; }
+        .bg-question-2 { font-size: 120px; bottom: 5%; left: 3%; --initial-rotate: -5deg; animation-duration: 28s; }
+        .bg-trophy-1 { font-size: 90px; top: 20%; left: 20%; --initial-rotate: 15deg; animation-duration: 20s; }
+        .bg-eye-1 { font-size: 70px; top: 5%; right: 30%; --initial-rotate: -10deg; animation-duration: 24s; }
+        .bg-comment-1 { font-size: 110px; bottom: 10%; right: 4%; --initial-rotate: 12deg; animation-duration: 19s; }
+        .bg-box-3 { font-size: 60px; top: 50%; left: 1%; --initial-rotate: 20deg; animation-duration: 26s; }
+
+        @keyframes floatSimple {
+            0% { transform: translateY(0px) rotate(var(--initial-rotate, 0deg)); }
+            50% { transform: translateY(-25px) rotate(calc(var(--initial-rotate, 0deg) + 8deg)); }
+            100% { transform: translateY(0px) rotate(calc(var(--initial-rotate, 0deg) - 8deg)); }
+        }
+        
+        /* --- CUSTOM SCROLLING CONTAINER --- */
+        .game-container {
+            max-width: 900px;
+            width: 100%;
+            background: linear-gradient(145deg, #fdfefe, #e9ecef);
+            color: var(--text-dark);
+            border-radius: var(--border-radius-game);
+            border: 3px solid var(--black-stroke);
+            box-shadow: 8px 8px 0px var(--black-stroke);
+            padding: 30px; 
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            max-height: calc(var(--app-height, 100vh) - 40px); /* Make container scrollable */
+            overflow-y: auto;
+        }
+
+        .brand-logo { object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+        .brand-logo-prominent { display: block; margin: 0 auto 15px; max-height: 80px; }
+        
+        h1 {
+            font-family: var(--font-logo);
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            color: var(--blyza-orange-primary);
+            -webkit-text-stroke: 2px var(--black-stroke);
+            text-stroke: 2px var(--black-stroke);
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        h3 { 
+            font-family: var(--font-heading-alt); 
+            margin-bottom: 15px; 
+            font-size: 1.5rem;
+            color: var(--text-dark);
+        }
+        
+        .screen { display: none; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .active { display: block; }
+        
+        /* --- Instructions & Info Panels --- */
+        .instructions, .team-inputs {
+            background: rgba(0,0,0, 0.04);
+            padding: 20px; border-radius: 10px; margin: 25px 0;
+            border: 2px dashed var(--text-medium);
+        }
+        .instructions p { font-size: 1.1rem; margin-bottom: 15px; font-weight: 600; }
+        .instructions ul { list-style-type: none; text-align: left; padding: 0 10px; }
+        .instructions li { margin-bottom: 10px; display: flex; align-items: center; }
+        .instructions li a {
+            color: var(--blyza-orange-primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            transition: color 0.3s ease;
+        }
+        .instructions li a:hover { color: var(--blyza-purple-secondary); text-decoration: underline; }
+        .instructions i { margin-right: 15px; font-size: 1.3em; color: var(--blyza-purple-secondary); width: 20px; text-align: center;}
+        
+        /* --- Buttons --- */
+        button, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-info {
+            font-family: var(--font-heading-alt); font-size: 1.1rem; padding: 0.7em 1.5em;
+            border: 3px solid var(--black-stroke); border-radius: 8px;
+            text-transform: uppercase; text-decoration: none; display: inline-flex;
+            align-items: center; justify-content: center; gap: 10px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            letter-spacing: 1px; cursor: pointer; color: var(--text-dark);
+            margin: 8px 5px;
+            box-shadow: var(--shadow-chunky);
+        }
+        button:hover:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--black-stroke); }
+        button:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0px 0px 0px var(--black-stroke); }
+        button:disabled { background: var(--text-medium); color: var(--text-light); cursor: not-allowed; opacity: 0.7; box-shadow: var(--shadow-chunky); }
+
+        .btn-primary, #start-game-btn, #next-turn-logic-btn { background-color: var(--blyza-sunny-yellow); }
+        .btn-secondary, #new-game-menu-btn { background-color: var(--blyza-purple-secondary); color: var(--text-light); }
+        .btn-success, #play-again-game-btn, #truth-choice-btn, #guesser-correct-btn { background-color: var(--blyza-keppel-accent); color: var(--text-light); }
+        .btn-danger, #lie-choice-btn, #guesser-wrong-btn { background-color: var(--blyza-quickfire-red); color: var(--text-light); }
+        .btn-info, #visit-store-btn { background-color: #4ECDC4; color: var(--text-dark); }
+
+        /* --- Team Selection --- */
+        #team-names-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .team-input-item input {
+            width: 100%; padding: 12px 18px; border-radius: 8px;
+            border: 3px solid var(--black-stroke); background: var(--text-light);
+            color: var(--text-dark); font-size: 1rem; transition: all 0.3s ease;
+            font-family: var(--font-body); font-weight: 600;
+        }
+        .team-input-item input:focus { outline: none; border-color: var(--blyza-orange-primary); box-shadow: 0 0 0 3px var(--blyza-sunny-yellow); }
+
+        /* --- Game Screen & Item Stage --- */
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-family: var(--font-heading-alt);
+            color: var(--text-dark);
+            border: 2px solid var(--black-stroke);
+        }
+        .current-player-display {
+            font-family: var(--font-heading-alt);
+            font-size: 1.6rem;
+            margin-bottom: 20px;
+            color: var(--blyza-orange-primary);
+            text-shadow: 1px 1px 0px var(--black-stroke);
+        }
+        .image-display-area { /* This is the "TV Screen" */
+            background: #111; border: 10px solid #333; border-radius: 15px; padding: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.5);
+            position: relative; z-index: 1; min-height: 300px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            margin-bottom: 25px;
+        }
+        .mystery-image-element {
+            max-height: 250px;
+            max-width: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: none; /* JS control */
+        }
+        .reveal-box-clickable {
+            width: 100%;
+            max-width: 350px;
+            height: 250px;
+            border: 3px dashed var(--blyza-orange-primary);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-light);
+        }
+        .reveal-box-clickable:hover {
+            background: rgba(255, 136, 51, 0.1);
+            border-color: var(--blyza-sunny-yellow);
+            transform: scale(1.02);
+        }
+        .reveal-box-clickable i { font-size: 3.5rem; margin-bottom: 15px; color: var(--blyza-orange-primary); transition: all 0.3s ease; }
+        .reveal-box-clickable:hover i { transform: scale(1.1); color: var(--blyza-sunny-yellow); }
+        .reveal-box-clickable span {
+            font-size: 1.2rem;
+            font-family: var(--font-heading-alt);
+            color: #fff;
+            padding: 0 10px;
+        }
+
+        #guesser-instruction-text {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            font-family: var(--font-heading-alt);
+            color: var(--blyza-purple-secondary);
+            display: none; /* JS control */
+        }
+        #guesser-instruction-text strong {
+            color: var(--blyza-orange-primary);
+        }
+        .action-buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        /* --- Results Screen --- */
+        .result-display-area {
+            background: #111; border: 10px solid #333; border-radius: 15px; padding: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.5);
+            min-height: 300px; display: flex;
+            align-items: center; justify-content: center;
+            margin-bottom: 25px;
+        }
+        #result-feedback-text {
+            font-size: 1.1rem;
+            margin: 20px auto;
+            font-weight: 600;
+            color: var(--text-medium);
+            max-width: 90%;
+            line-height: 1.7;
+        }
+        #result-feedback-text strong { color: var(--blyza-orange-primary); }
+        
+        /* --- Score & Game Over --- */
+        .score-display-area, #final-scores-display-area {
+            display: grid;
+            gap: 20px;
+            margin: 30px 0;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        .score-card {
+            background: rgba(0,0,0,0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 3px solid var(--black-stroke);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-chunky);
+        }
+        .score-card h4 {
+            font-family: var(--font-heading-alt);
+            color: var(--blyza-orange-primary);
+        }
+        .score-card .score-value-text {
+            font-family: var(--font-heading-alt);
+            font-size: 2rem;
+        }
+        .score-card.winner-glow {
+            animation: winnerGlow 1.5s infinite alternate;
+            border-color: var(--blyza-keppel-accent);
+        }
+        @keyframes winnerGlow {
+            from { box-shadow: 4px 4px 0 var(--blyza-keppel-accent); }
+            to { box-shadow: 4px 4px 15px var(--blyza-keppel-accent); }
+        }
+        
+        .progress-bar-element {
+            height: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50px;
+            margin-top: 15px;
+            overflow: hidden;
+            border: 2px solid var(--black-stroke);
+        }
+        .progress-fill-element {
+            height: 100%;
+            background: var(--blyza-sunny-yellow);
+            border-radius: 50px;
+            transition: width 0.5s ease;
+        }
+
+        .winner-trophy-icon {
+            font-size: 6rem;
+            margin: 20px 0;
+            animation: bounce 1.5s infinite ease-in-out;
+            color: var(--blyza-sunny-yellow);
+            text-shadow: 0 0 20px var(--blyza-orange-primary), 3px 3px 0 var(--black-stroke);
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-25px); } }
+        
+        .win-message-text {
+            font-family: var(--font-logo);
+            font-size: 3rem;
+            margin: 20px 0;
+            color: var(--blyza-orange-primary);
+            -webkit-text-stroke: 2px var(--black-stroke);
+            text-stroke: 2px var(--black-stroke);
+        }
+        #winner-message-details {
+            font-size: 1.1rem;
+            color: var(--text-medium);
+            font-weight: 600;
+        }
+
+        /* --- Floating Icon Buttons --- */
+        .icon-btn {
+            position: absolute; background-color: var(--blyza-purple-secondary);
+            color: var(--text-light); border-radius: 50%; width: 55px; height: 55px;
+            font-size: 1.2rem; cursor: pointer; transition: all 0.1s ease;
+            display: flex; justify-content: center; align-items: center; z-index: 100;
+            text-decoration: none; border: 3px solid var(--black-stroke);
+            box-shadow: 4px 4px 0px var(--black-stroke);
+        }
+        .icon-btn:hover:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--black-stroke); }
+        .icon-btn:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0px 0px 0px var(--black-stroke); }
+        #settings-btn { top: 20px; right: 20px; }
+        #home-menu-btn, #back-btn { top: 20px; left: 20px; }
+        #back-btn { display: none; }
+        
+        /* --- Modal Styles --- */
+        .modal {
+            position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; animation: fadeInModal 0.3s ease;
+        }
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content {
+            background-color: var(--darker-grey-bg); margin: auto; padding: 25px;
+            border: 3px solid var(--black-stroke); border-radius: var(--border-radius-game);
+            width: 90%; max-width: 450px; box-shadow: 8px 8px 0px rgba(0,0,0,0.4);
+            position: relative; color: var(--text-light); text-align: center;
+        }
+        .modal-content h2 {
+            font-family: var(--font-logo); color: var(--blyza-orange-primary);
+            -webkit-text-stroke: 1.5px var(--black-stroke); text-stroke: 1.5px var(--black-stroke);
+            text-align: center; margin-bottom: 25px; font-size: 2rem;
+        }
+        .setting-item { margin-bottom: 18px; display: flex; flex-direction: column; }
+        .setting-item label { margin-bottom: 10px; font-weight: 600; font-size: 1rem; }
+        .close-modal-btn { color: #aaa; position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s; }
+        .close-modal-btn:hover { color: var(--text-light); }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; cursor: pointer; background: rgba(0,0,0,0.3); border-radius: 5px; border: 2px solid var(--black-stroke); }
+        input[type=range]::-webkit-slider-thumb { border: 2px solid var(--black-stroke); height: 22px; width: 22px; border-radius: 50%; background: var(--blyza-orange-primary); cursor: pointer; -webkit-appearance: none; margin-top: -9px; }
+        
+        #audio-consent-modal .modal-content p { font-family: var(--font-body); font-weight: 600; font-size: 1.1rem; margin-bottom: 25px; color: var(--text-light); }
+        #audio-consent-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+
+        /* --- Feedback Popup --- */
+        .feedback-popup {
+            position: fixed; top: 50%; left: 50%;
+            background-color: var(--text-dark); color: white;
+            padding: 25px 40px; border-radius: var(--border-radius-game);
+            font-size: 2.5rem; font-family: var(--font-logo); text-align: center;
+            z-index: 2000; box-shadow: 8px 8px 0px rgba(0,0,0,0.5);
+            opacity: 0; transform: translate(-50%, -50%) scale(0.7);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none; border: 3px solid var(--black-stroke);
+            display: none;
+        }
+        .feedback-popup.show { opacity: 1; transform: translate(-50%, -50%) scale(1); display: block; }
+        .feedback-popup.correct { color: var(--blyza-keppel-accent); }
+        .feedback-popup.incorrect { color: var(--blyza-quickfire-red); }
+        .feedback-popup.info { color: var(--blyza-sunny-yellow); }
+
+        /* --- Confetti --- */
+        .confetti-piece { position: fixed; width: 10px; height: 20px; background-color: var(--blyza-orange-primary); opacity: 0; animation-timing-function: linear; animation-fill-mode: forwards; pointer-events: none; z-index: 3000; }
+        @keyframes fallAndFade { 0% { transform: translateY(-20vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(120vh) rotate(720deg); opacity: 0; } }
+        
+        /* --- Game Over Section & "Treat Yourself" --- */
+        .game-over-buttons-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
+        .game-over-button-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; }
+        .treat-yourself-callout {
+            margin-bottom: 8px; background-color: var(--blyza-sunny-yellow); color: var(--text-dark);
+            padding: 8px 15px; border-radius: 20px; font-family: var(--font-heading-alt);
+            font-size: 0.9rem; white-space: nowrap; box-shadow: var(--shadow-chunky);
+            display: none; align-items: center; gap: 8px; z-index: 10;
+            border: 2px solid var(--black-stroke);
+        }
+        .treat-yourself-callout i { font-size: 1.2em; animation: bounceArrow 1s infinite; }
+        @keyframes bounceArrow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 768px) {
+            body { 
+                padding: 10px; 
+                align-items: flex-start;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+            .game-container { 
+                padding: 45px 15px 15px; 
+                max-height: calc(var(--app-height, 100vh) - 40px);
+            } 
+            h1 { font-size: 2.2rem; margin-top: 5px; }
+            .instructions { padding: 15px; }
+            #team-names-container, .score-display-area { grid-template-columns: 1fr; }
+            .icon-btn { width: 48px; height: 48px; }
+            #settings-btn { top: 12px; right: 12px; }
+            #home-menu-btn, #back-btn { top: 12px; left: 12px; }
+            .feedback-popup { font-size: 2rem; padding: 20px 30px; width: 90%; }
+            .modal-content { padding: 20px; }
+            .game-over-buttons-container { flex-direction: column; align-items: center; }
+            .game-over-buttons-container .game-over-button-wrapper { width: 90%; }
+            .game-over-buttons-container .game-over-button-wrapper button { width: 100%; }
+            .mystery-image-element { max-height: 200px; }
+            .current-player-display { font-size: 1.4rem; }
+            .win-message-text { font-size: 2.2rem; }
+            .bg-game-element { display: none; }
+            .action-buttons-container { flex-direction: column; align-items: center; }
+            .action-buttons-container button { width: 90%; }
+        }

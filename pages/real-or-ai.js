@@ -23,7 +23,6 @@ const mediaItems = [
 ];
 const GameScreen = { START: 'start', GAME: 'game', RESULTS: 'results', GAME_OVER: 'gameOver' };
 const MAX_ROUNDS = 5;
-const HTML_GAME_URL = '/games/real-or-ai/local.html';
 
 // ==================================================================
 //  LOCAL GAME UI COMPONENTS (Unchanged from your previous version)
@@ -71,6 +70,7 @@ const StartScreenComponent = ({ gameMode, setGameMode, playSound, sfxRefs, teams
                         </div>
                     ))}
                 </div>
+                <button id="add-team-btn" onClick={() => {playSound(sfxRefs.interaction); teams.length < 4 && setTeams([...teams, { name: '' }])}} disabled={teams.length >= 4}>Add Team</button>
                 <button id="start-game-btn" onClick={handleStartGame} className="btn-primary">Start Game <i className="fas fa-play"></i></button>
             </div>
         )}
@@ -88,7 +88,7 @@ const GameScreenComponent = ({ gameMode, singlePlayerSubType, scores, currentRou
     const videoRef = useRef(null);
     useEffect(() => {
         if (curtainsOpen && currentMedia?.type === 'video' && videoRef.current) {
-            videoRef.current.play().catch(e => console.error("Video autoplay was prevented.", e));
+            videoRef.current.play().catch(e => console.error("Video autoplay prevented.", e));
         }
     }, [curtainsOpen, currentMedia]);
 
@@ -119,8 +119,12 @@ const GameScreenComponent = ({ gameMode, singlePlayerSubType, scores, currentRou
                 </div>
             </div>
             <div className="choice-buttons">
-                <button onClick={() => handleChoice('real')} className="choice-btn btn-success" disabled={buttonsDisabled}><i className="fas fa-check-circle"></i> Real</button>
-                <button onClick={() => handleChoice('ai')} className="choice-btn btn-danger" disabled={buttonsDisabled}><i className="fas fa-robot"></i> AI</button>
+                <button onClick={() => handleChoice('real')} className="choice-btn btn-success" disabled={buttonsDisabled}>
+                    {buttonsDisabled ? 'Locked In' : <><i className="fas fa-check-circle"></i> Real</>}
+                </button>
+                <button onClick={() => handleChoice('ai')} className="choice-btn btn-danger" disabled={buttonsDisabled}>
+                    {buttonsDisabled ? 'Locked In' : <><i className="fas fa-robot"></i> AI</>}
+                </button>
             </div>
         </div>
     );
@@ -457,29 +461,29 @@ export default function RealOrAIPage() {
         });
         setScores(newScores);
         
-        // Play appropriate sound and show toast
-        if(correctPlayers.length > 0) {
-            playSound(sfxRefs.correct);
-            showToast("Correct!", 'correct');
+        // Enhanced toast notifications
+        if(gameMode === 'single') {
+            if(correctPlayers.length > 0) {
+                showToast("Correct Answer!", 'correct');
+                playSound(sfxRefs.correct);
+            } else {
+                showToast("Wrong Answer!", 'wrong');
+                playSound(sfxRefs.incorrect);
+            }
         } else {
-            playSound(sfxRefs.incorrect);
-            showToast("Wrong!", 'wrong');
+            if(correctPlayers.length === teams.length) {
+                showToast("Everyone got it right!", 'correct');
+                playSound(sfxRefs.correct);
+            } else if(correctPlayers.length > 0) {
+                showToast(`${correctPlayers.join(' & ')} got it right!`, 'correct');
+                playSound(sfxRefs.correct);
+            } else {
+                showToast("No one got it right!", 'wrong');
+                playSound(sfxRefs.incorrect);
+            }
         }
-
-        // For single player infinite mode, end game immediately on wrong answer
-        if (gameMode === 'single' && singlePlayerSubType === 'infinite' && correctPlayers.length === 0) {
-            setScreen(GameScreen.GAME_OVER);
-            return;
-        }
-
-        // For 5 rounds mode, check if we've reached 5 rounds
-        if (gameMode === 'single' && singlePlayerSubType === '5rounds' && currentRound >= 5) {
-            setScreen(GameScreen.GAME_OVER);
-            return;
-        }
-
         setScreen(GameScreen.RESULTS);
-    }, [scores, teams, currentMedia, playSound, sfxRefs, gameMode, showToast, singlePlayerSubType, currentRound]);
+    }, [scores, teams, currentMedia, playSound, sfxRefs, gameMode, showToast]);
 
     const handleChoice = useCallback((choice) => {
         playSound(sfxRefs.interaction);
@@ -639,7 +643,13 @@ export default function RealOrAIPage() {
         <div className="game-page-wrapper">
             <div className="hero-background-elements">
                 <div className="bg-game-element bg-android-1"><i className="fas fa-android"></i></div>
+                <div className="bg-game-element bg-android-2"><i className="fas fa-android"></i></div>
                 <div className="bg-game-element bg-brain-1"><i className="fas fa-brain"></i></div>
+                <div className="bg-game-element bg-brain-2"><i className="fas fa-brain"></i></div>
+                <div className="bg-game-element bg-robot-1"><i className="fas fa-robot"></i></div>
+                <div className="bg-game-element bg-robot-2"><i className="fas fa-robot"></i></div>
+                <div className="bg-game-element bg-question-1"><i className="fas fa-question-circle"></i></div>
+                <div className="bg-game-element bg-question-2"><i className="fas fa-question-circle"></i></div>
             </div>
             <div className="game-container">{children}</div>
         </div>
@@ -695,8 +705,6 @@ export default function RealOrAIPage() {
     return (
         <>
             {sharedHead}
-            <button id="home-menu-btn" className="icon-btn" onClick={() => router.push('/')}><i className="fas fa-arrow-left"></i></button>
-            <button id="settings-btn" className="icon-btn" onClick={() => { playSound(sfxRefs.interaction); setSettingsModalOpen(true); }}><i className="fas fa-cog"></i></button>
             {sharedWrapper(
                 <div id="mode-selection-screen" className="screen active">
                     <img className="brand-logo brand-logo-prominent" src="https://static.wixstatic.com/shapes/9ce3e5_4f0149a89dd841859da02f59247b5b6b.svg" alt="Blyza Mascot" />

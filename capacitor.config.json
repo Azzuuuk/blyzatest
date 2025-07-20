@@ -1,0 +1,6 @@
+{
+  "appId": "com.blyza.app",
+  "appName": "Blyza",
+  "webDir": "out",
+  "bundledWebRuntime": false
+}

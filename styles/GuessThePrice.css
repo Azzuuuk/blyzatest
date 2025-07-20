@@ -36,10 +36,21 @@ body {
 /* --- Floating Background & Fixed Buttons --- */
 .hero-background-elements { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events: none; }
 .bg-game-element { position: absolute; opacity: 0.1; color: var(--text-light); animation: floatSimple 20s infinite ease-in-out alternate; user-select: none; }
-.bg-dollar-1 { font-size: 150px; top: 10%; left: 5%; --initial-rotate: -15deg; animation-duration: 22s; }
-.bg-tag-1 { font-size: 100px; top: 65%; right: 8%; --initial-rotate: 10deg; animation-duration: 18s; }
-.bg-cart-1 { font-size: 120px; top: 70%; left: 15%; --initial-rotate: 5deg; animation-duration: 25s; opacity: 0.08; }
-.bg-cash-1 { font-size: 130px; top: 15%; right: 10%; --initial-rotate: 20deg; animation-duration: 16s; transform: scaleX(-1); }
+.bg-dollar-1 { font-size: 150px; top: 5%; left: 5%; --initial-rotate: -15deg; animation-duration: 22s; }
+.bg-tag-1 { font-size: 100px; top: 75%; right: 8%; --initial-rotate: 10deg; animation-duration: 18s; }
+.bg-cart-1 { font-size: 120px; top: 80%; left: 15%; --initial-rotate: 5deg; animation-duration: 25s; opacity: 0.08; }
+.bg-cash-1 { font-size: 130px; top: 10%; right: 10%; --initial-rotate: 20deg; animation-duration: 16s; transform: scaleX(-1); }
+
+.bg-dollar-2 { font-size: 120px; top: 35%; right: 25%; --initial-rotate: 25deg; animation-duration: 20s; }
+.bg-tag-2 { font-size: 90px; top: 25%; left: 30%; --initial-rotate: -20deg; animation-duration: 23s; }
+.bg-cart-2 { font-size: 110px; bottom: 35%; right: 15%; --initial-rotate: 15deg; animation-duration: 19s; opacity: 0.08; }
+.bg-cash-2 { font-size: 140px; top: 45%; left: 20%; --initial-rotate: -10deg; animation-duration: 21s; transform: scaleX(-1); }
+
+/* Add new positions for additional elements */
+.bg-dollar-3 { font-size: 130px; top: 60%; right: 35%; --initial-rotate: 30deg; animation-duration: 24s; }
+.bg-tag-3 { font-size: 95px; top: 40%; left: 40%; --initial-rotate: -25deg; animation-duration: 17s; }
+.bg-cart-3 { font-size: 115px; bottom: 15%; right: 45%; --initial-rotate: 20deg; animation-duration: 22s; opacity: 0.08; }
+.bg-cash-3 { font-size: 125px; top: 20%; left: 45%; --initial-rotate: -15deg; animation-duration: 19s; transform: scaleX(-1); }
 
 @keyframes floatSimple {
     0% { transform: translateY(0px) rotate(var(--initial-rotate, 0deg)); }
@@ -63,7 +74,7 @@ body {
 .game-container {
     max-width: 900px; width: 100%; background: linear-gradient(145deg, #fdfefe, #e9ecef); color: var(--text-dark);
     border-radius: var(--border-radius-game); border: 3px solid var(--black-stroke); box-shadow: 8px 8px 0px var(--black-stroke);
-    padding: 30px; text-align: center; position: relative; z-index: 2;
+    padding: 30px; text-align: center; position: relative; z-index: 10;
 }
 
 /* --- Shared & Start Screen Styles --- */
@@ -216,20 +227,38 @@ input[type=range]::-webkit-slider-thumb { border: 2px solid var(--black-stroke);
 /* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
     .game-page-wrapper {
-        align-items: flex-start; padding-top: 80px; padding-bottom: 40px;
+        align-items: center;
+        min-height: var(--app-height);
+        padding: 80px 15px 40px;
     }
     .game-container { 
-        padding: 20px 15px; max-height: calc(var(--app-height) - 100px); overflow-y: auto;
+        padding: 20px 15px;
+        height: calc(var(--app-height) - 120px);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
     } 
-    h1 { font-size: 2.2rem; }
-    .game-mode-selection { flex-direction: column; align-items: stretch; }
-    .mode-option { max-width: 100%; min-width: unset; }
-    .guess-inputs, .score-display { grid-template-columns: 1fr; }
-    .icon-btn { width: 48px; height: 48px; }
-    #settings-btn { top: 15px; right: 15px; }
-    #home-menu-btn { top: 15px; left: 15px; }
-    .win-message { font-size: 2.2rem; }
-    .bg-game-element { display: none; }
-    .game-over-buttons-container { flex-direction: column; align-items: center; }
-    .toast { top: 70px; font-size: 1.2rem; padding: 12px 25px; }
+    
+    /* Team setup improvements */
+    .team-inputs {
+        width: 100%;
+        max-width: 500px;
+        margin: 25px auto;
+    }
+    .team-input-wrapper {
+        width: 100%;
+        justify-content: center;
+    }
+    .team-input-wrapper input {
+        max-width: 300px;
+    }
+}
+
+/* Price Input Formatting */
+.price-input {
+    text-align: right;
+}
+/* Format the value as the user types */
+.price-input.formatted {
+    letter-spacing: 1px;
 }
