@@ -322,12 +322,15 @@ export default function GuessThePricePage() {
         update(ref(db, `game_sessions/${gameId}`), updates);
     };
     
-    // Back button logic: leaves the current game session
+    // MODIFIED: This function now handles conditional navigation.
     const handleBackButton = () => {
         if (gameId) {
+            // If we are in a game or lobby, leave it.
+            // This will set gameId to null, which automatically shows the MultiplayerStartScreen.
             leaveGame();
         } else {
-            router.push('/'); // Or wherever your main game hub is
+            // If we are already on the start screen (no gameId), go to the main website.
+            window.location.href = 'https://www.playblyza.com/';
         }
     }
     
