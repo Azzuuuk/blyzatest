@@ -174,7 +174,7 @@ export default function GamesListPage() {
 
       <main>
           <div className="store-btn-container">
-              <a onClick={() => handleNavigation('/store')} className="store-btn btn-retro-floating" style={{ cursor: 'pointer' }}>
+              <a onClick={() => handleNavigation('/store.js')} className="store-btn btn-retro-floating" style={{ cursor: 'pointer' }}>
                   <i className="fas fa-store"></i> Store
               </a>
           </div>

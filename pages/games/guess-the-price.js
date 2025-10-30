@@ -61,6 +61,9 @@ const itemsData = [
                 { name: "Animal", category: "Chihuahua average purchase price", price: 850, image: "https://static.wixstatic.com/media/9ce3e5_6c51f9a5493a426dabe30036597720ec~mv2.png", description: "Ugly ahh" },
                 { name: "Online", category: "Temu average product price", price: 13, image: "https://static.wixstatic.com/media/9ce3e5_42c7fbc95ec043fda69990d76b712418~mv2.png", description: "Goated site." },
                 { name: "Money", category: "How much Jeff Bezos makes every Minute", price: 30000, image: "https://static.wixstatic.com/media/9ce3e5_3afa5a8ac7904e349eff3944fa5b6c9a~mv2.png", description: "Money is not real." },
+              { name: "Product", category: "DNA Genetic Testing Kit", price: 99, image: "https://static.wixstatic.com/media/9ce3e5_bc7ceb8d9d5d4c09aa0c85d5ea07d371~mv2.png", description: "I'm 10% European" },
+                { name: "Product", category: "Garmin 2K UHD Dash Cam", price: 229, image: "https://static.wixstatic.com/media/9ce3e5_182d9f7079a2458884f5e541cdffa63e~mv2.jpg", description: "No insurance scams on my watch." },
+                { name: "Product", category: "Instant Underwear Can", price: 10, image: "https://static.wixstatic.com/media/9ce3e5_bf673ea914ba489ca9bfb7e54cbd448f~mv2.png", description: "For emergencies only." },
                 { name: "Money", category: "100 Pakistani Rupees in USD", price: 0.32, image: "https://static.wixstatic.com/media/9ce3e5_57e922e9ac0f4754b47f472a3125abaa~mv2.png", description: "My pledge is that I will be pilot." },];
 
 const POINTS_TO_WIN = 3; // Points needed to win in multiplayer
